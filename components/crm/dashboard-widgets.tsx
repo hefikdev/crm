@@ -15,7 +15,7 @@ export function DashboardWidgets() {
     return (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {Array.from({ length: 3 }).map((_, i) => (
-          <Skeleton key={i} className="h-40 bg-zinc-800" />
+          <Skeleton key={i} className="h-40 bg-accent" />
         ))}
       </div>
     );
@@ -28,40 +28,40 @@ export function DashboardWidgets() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-      <Card className="border-zinc-800 bg-zinc-950">
+      <Card className="border-border bg-card">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
+            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Współczynnik konwersji
             </CardTitle>
             <Target className="h-4 w-4 text-blue-400" />
           </div>
         </CardHeader>
         <CardContent>
-          <p className="text-2xl font-bold text-white">{winRate}%</p>
-          <div className="mt-2 h-1.5 rounded-full bg-zinc-800 overflow-hidden">
+          <p className="text-2xl font-bold text-foreground">{winRate}%</p>
+          <div className="mt-2 h-1.5 rounded-full bg-accent overflow-hidden">
             <div
               className="h-full rounded-full bg-blue-500 transition-all duration-500"
               style={{ width: `${winRate}%` }}
             />
           </div>
-          <p className="text-xs text-zinc-500 mt-2">
+          <p className="text-xs text-muted-foreground mt-2">
             {wonCount} z {totalDeals} ofert zakończonych sukcesem
           </p>
         </CardContent>
       </Card>
 
-      <Card className="border-zinc-800 bg-zinc-950">
+      <Card className="border-border bg-card">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
+            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Aktywne oferty
             </CardTitle>
             <Zap className="h-4 w-4 text-amber-400" />
           </div>
         </CardHeader>
         <CardContent>
-          <p className="text-2xl font-bold text-white">{activeDeals}</p>
+          <p className="text-2xl font-bold text-foreground">{activeDeals}</p>
           <div className="flex items-center gap-2 mt-2">
             <div className="flex -space-x-1">
               {pipeline?.filter((p) => !["closed_won", "closed_lost"].includes(p.stage)).map((p) => (
@@ -81,31 +81,31 @@ export function DashboardWidgets() {
                 />
               ))}
             </div>
-            <span className="text-xs text-zinc-500">w pipeline</span>
+            <span className="text-xs text-muted-foreground">w pipeline</span>
           </div>
           <Link
             href="/a/deals"
-            className="inline-flex items-center gap-1 text-xs text-zinc-400 hover:text-white mt-2 transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground mt-2 transition-colors cursor-pointer"
           >
             Zobacz wszystkie <ArrowRight className="h-3 w-3" />
           </Link>
         </CardContent>
       </Card>
 
-      <Card className="border-zinc-800 bg-zinc-950">
+      <Card className="border-border bg-card">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
+            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Oczekujące aktywności
             </CardTitle>
             <Clock className="h-4 w-4 text-purple-400" />
           </div>
         </CardHeader>
         <CardContent>
-          <p className="text-2xl font-bold text-white">{stats?.pendingActivities ?? 0}</p>
+          <p className="text-2xl font-bold text-foreground">{stats?.pendingActivities ?? 0}</p>
           <Link
             href="/a/tasks"
-            className="inline-flex items-center gap-1 text-xs text-zinc-400 hover:text-white mt-2 transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground mt-2 transition-colors cursor-pointer"
           >
             Przejdź do zadań <ArrowRight className="h-3 w-3" />
           </Link>

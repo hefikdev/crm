@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { TRPCProvider } from "@/lib/trpc/provider";
+import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -26,14 +27,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang="pl" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased bg-black text-zinc-50`}
+        className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}
       >
-        <TRPCProvider>
-          <TooltipProvider>{children}</TooltipProvider>
-        </TRPCProvider>
-        <Toaster richColors closeButton />
+        <ThemeProvider>
+          <TRPCProvider>
+            <TooltipProvider>{children}</TooltipProvider>
+          </TRPCProvider>
+          <Toaster richColors closeButton />
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -32,11 +32,11 @@ export function ActivityTimeline({ contactId }: { contactId: string }) {
 
   if (isLoading) {
     return (
-      <Card className="border-zinc-800 bg-zinc-950">
-        <CardHeader><CardTitle className="text-sm text-zinc-400">Aktywności</CardTitle></CardHeader>
+      <Card className="border-border bg-card">
+        <CardHeader><CardTitle className="text-sm text-muted-foreground">Aktywności</CardTitle></CardHeader>
         <CardContent className="space-y-3">
           {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-16 bg-zinc-800" />
+            <Skeleton key={i} className="h-16 bg-accent" />
           ))}
         </CardContent>
       </Card>
@@ -44,41 +44,41 @@ export function ActivityTimeline({ contactId }: { contactId: string }) {
   }
 
   return (
-    <Card className="border-zinc-800 bg-zinc-950">
+    <Card className="border-border bg-card">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-sm text-zinc-400">Aktywności</CardTitle>
+        <CardTitle className="text-sm text-muted-foreground">Aktywności</CardTitle>
         <Button
           variant="ghost"
           size="sm"
           onClick={() => router.push(`/a/activities/new`)}
-          className="text-zinc-500 hover:text-white cursor-pointer"
+          className="text-muted-foreground hover:text-foreground cursor-pointer"
         >
           + Dodaj
         </Button>
       </CardHeader>
       <CardContent>
         {data?.data.length === 0 ? (
-          <p className="text-sm text-zinc-500 text-center py-6">Brak aktywności</p>
+          <p className="text-sm text-muted-foreground text-center py-6">Brak aktywności</p>
         ) : (
-          <div className="space-y-1 relative before:absolute before:left-4 before:top-0 before:h-full before:w-px before:bg-zinc-800">
+          <div className="space-y-1 relative before:absolute before:left-4 before:top-0 before:h-full before:w-px before:bg-accent">
             {data?.data.map((activity) => (
               <div key={activity.id} className="flex gap-3 pl-10 relative pb-3">
-                <div className="absolute left-2.5 top-1 w-3 h-3 rounded-full bg-zinc-800 flex items-center justify-center">
+                <div className="absolute left-2.5 top-1 w-3 h-3 rounded-full bg-accent flex items-center justify-center">
                   {activity.status === "completed" ? (
                     <CheckCircle2 className="h-3 w-3 text-emerald-400" />
                   ) : (
-                    <Clock className="h-3 w-3 text-zinc-400" />
+                    <Clock className="h-3 w-3 text-muted-foreground" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-zinc-500">{typeIcons[activity.type]}</span>
-                    <Badge className="bg-zinc-800 text-zinc-300 text-xs">
+                    <span className="text-xs text-muted-foreground">{typeIcons[activity.type]}</span>
+                    <Badge className="bg-accent text-foreground/80 text-xs">
                       {typeLabels[activity.type] ?? activity.type}
                     </Badge>
                   </div>
-                  <p className="text-sm text-white mt-0.5">{activity.title}</p>
-                  <p className="text-xs text-zinc-500">
+                  <p className="text-sm text-foreground mt-0.5">{activity.title}</p>
+                  <p className="text-xs text-muted-foreground">
                     {new Date(activity.createdAt).toLocaleDateString("pl-PL")}
                   </p>
                 </div>

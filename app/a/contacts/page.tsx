@@ -19,10 +19,10 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 const statusColors: Record<string, string> = {
-  active: "bg-emerald-900 text-emerald-200",
-  inactive: "bg-zinc-800 text-zinc-300",
-  lead: "bg-blue-900 text-blue-200",
-  archived: "bg-zinc-800 text-zinc-500",
+  active: "bg-emerald-500/15 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-200",
+  inactive: "bg-accent text-foreground/80",
+  lead: "bg-blue-500/15 text-blue-700 dark:bg-blue-900 dark:text-blue-200",
+  archived: "bg-accent text-muted-foreground",
 };
 
 export default function ContactsPage() {
@@ -50,13 +50,13 @@ export default function ContactsPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Kontakty</h1>
-          <p className="text-zinc-500 text-sm mt-1">
+          <h1 className="text-2xl font-bold text-foreground">Kontakty</h1>
+          <p className="text-muted-foreground text-sm mt-1">
             {data?.total ?? 0} kontaktów
           </p>
         </div>
         <Link href="/a/contacts/new">
-          <Button className="bg-white text-black hover:bg-zinc-200 cursor-pointer">
+          <Button className="bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer">
             <Plus className="h-4 w-4 mr-2" />
             Dodaj kontakt
           </Button>
@@ -65,18 +65,18 @@ export default function ContactsPage() {
 
       <div className="flex gap-3">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Szukaj kontaktów..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            className="pl-9 border-zinc-800 bg-zinc-900 text-white placeholder:text-zinc-600"
+            className="pl-9 border-border bg-muted text-foreground placeholder:text-muted-foreground/70"
           />
         </div>
         <select
           value={status}
           onChange={(e) => { setStatus(e.target.value); setPage(1); }}
-          className="px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-900 text-white text-sm cursor-pointer"
+          className="px-3 py-2 rounded-lg border border-border bg-muted text-foreground text-sm cursor-pointer"
         >
           <option value="all">Wszystkie</option>
           <option value="active">Aktywne</option>
@@ -86,40 +86,40 @@ export default function ContactsPage() {
         </select>
       </div>
 
-      <Card className="border-zinc-800 bg-zinc-950">
+      <Card className="border-border bg-card">
         <CardContent className="p-0">
           {isLoading ? (
             <div className="p-4 space-y-3">
               {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className="h-16 bg-zinc-800" />
+                <Skeleton key={i} className="h-16 bg-accent" />
               ))}
             </div>
           ) : data?.data.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-zinc-500">Brak kontaktów</p>
+              <p className="text-muted-foreground">Brak kontaktów</p>
               <Link href="/a/contacts/new">
-                <Button variant="link" className="text-white cursor-pointer">
+                <Button variant="link" className="text-foreground cursor-pointer">
                   Utwórz pierwszy kontakt
                 </Button>
               </Link>
             </div>
           ) : (
-            <div className="divide-y divide-zinc-800">
+            <div className="divide-y divide-border">
               {data?.data.map((contact) => (
                 <div
                   key={contact.id}
-                  className="flex items-center justify-between p-4 hover:bg-zinc-900 transition-colors cursor-pointer"
+                  className="flex items-center justify-between p-4 hover:bg-muted transition-colors cursor-pointer"
                   onClick={() => router.push(`/a/contacts/${contact.id}`)}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="h-10 w-10 rounded-full bg-zinc-800 flex items-center justify-center text-sm font-medium text-zinc-300 shrink-0">
+                    <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center text-sm font-medium text-foreground/80 shrink-0">
                       {contact.firstName[0]}{contact.lastName[0]}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-white truncate">
+                      <p className="text-sm font-medium text-foreground truncate">
                         {contact.firstName} {contact.lastName}
                       </p>
-                      <div className="flex items-center gap-2 text-xs text-zinc-500">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         {contact.email && (
                           <span className="flex items-center gap-1">
                             <Mail className="h-3 w-3" />
@@ -140,14 +140,16 @@ export default function ContactsPage() {
                       {contact.status === "active" ? "Aktywny" : contact.status === "inactive" ? "Nieaktywny" : contact.status === "lead" ? "Lead" : "Zarchiwizowany"}
                     </Badge>
                     <DropdownMenu>
-                      <DropdownMenuTrigger>
-                        <Button variant="ghost" size="icon" className="text-zinc-400 hover:text-white cursor-pointer">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
+                      <DropdownMenuTrigger
+                        render={
+                          <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground cursor-pointer" />
+                        }
+                      >
+                        <MoreHorizontal className="h-4 w-4" />
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent className="bg-zinc-900 border-zinc-800 text-white">
+                      <DropdownMenuContent className="bg-popover border-border text-popover-foreground">
                         <DropdownMenuItem
-                          className="cursor-pointer hover:bg-zinc-800"
+                          className="cursor-pointer hover:bg-accent"
                           onClick={(e) => {
                             e.stopPropagation();
                             router.push(`/a/contacts/${contact.id}`);
@@ -156,7 +158,7 @@ export default function ContactsPage() {
                           Edytuj
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          className="text-red-400 cursor-pointer hover:bg-zinc-800"
+                          className="text-red-400 cursor-pointer hover:bg-accent"
                           onClick={(e) => {
                             e.stopPropagation();
                             if (confirm("Usunąć ten kontakt?")) {
@@ -183,11 +185,11 @@ export default function ContactsPage() {
             size="sm"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="border-zinc-800 text-zinc-400 hover:text-white cursor-pointer"
+            className="border-border text-muted-foreground hover:text-foreground cursor-pointer"
           >
             Poprzednia
           </Button>
-          <span className="text-sm text-zinc-500">
+          <span className="text-sm text-muted-foreground">
             Strona {page} z {data.totalPages}
           </span>
           <Button
@@ -195,7 +197,7 @@ export default function ContactsPage() {
             size="sm"
             onClick={() => setPage((p) => Math.min(data.totalPages, p + 1))}
             disabled={page === data.totalPages}
-            className="border-zinc-800 text-zinc-400 hover:text-white cursor-pointer"
+            className="border-border text-muted-foreground hover:text-foreground cursor-pointer"
           >
             Następna
           </Button>

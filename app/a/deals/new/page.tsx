@@ -47,34 +47,34 @@ export default function NewDealPage() {
   };
 
   return (
-    <div className="p-6 space-y-6 max-w-2xl">
-      <Link href="/a/deals" className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white cursor-pointer">
+    <div className="p-6 space-y-6 max-w-2xl mx-auto min-h-[calc(100vh-8rem)] flex flex-col justify-center">
+      <Link href="/a/deals" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground cursor-pointer">
         <ArrowLeft className="h-4 w-4" /> Powrót do ofert
       </Link>
-      <Card className="border-zinc-800 bg-zinc-950">
-        <CardHeader><CardTitle className="text-white">Nowa oferta</CardTitle></CardHeader>
+      <Card className="border-border bg-card">
+        <CardHeader><CardTitle className="text-foreground">Nowa oferta</CardTitle></CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-zinc-300">Tytuł</Label>
-              <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required className="border-zinc-800 bg-zinc-900 text-white" />
+              <Label className="text-foreground/80">Tytuł</Label>
+              <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required className="bg-background text-foreground" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-zinc-300">Wartość</Label>
-                <Input type="number" value={form.value} onChange={(e) => setForm({ ...form, value: Number(e.target.value) })} className="border-zinc-800 bg-zinc-900 text-white" />
+                <Label className="text-foreground/80">Wartość</Label>
+                <Input type="number" value={form.value} onChange={(e) => setForm({ ...form, value: Number(e.target.value) })} className="bg-background text-foreground" />
               </div>
               <div className="space-y-2">
-                <Label className="text-zinc-300">Prawdopodobieństwo (%)</Label>
-                <Input type="number" min={0} max={100} value={form.probability} onChange={(e) => setForm({ ...form, probability: Number(e.target.value) })} className="border-zinc-800 bg-zinc-900 text-white" />
+                <Label className="text-foreground/80">Prawdopodobieństwo (%)</Label>
+                <Input type="number" min={0} max={100} value={form.probability} onChange={(e) => setForm({ ...form, probability: Number(e.target.value) })} className="bg-background text-foreground" />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-zinc-300">Etap</Label>
+                <Label className="text-foreground/80">Etap</Label>
                 <Select value={form.stage} onValueChange={(v) => setForm({ ...form, stage: (v ?? "lead") as typeof form.stage })}>
-                  <SelectTrigger className="border-zinc-800 bg-zinc-900 text-white"><SelectValue /></SelectTrigger>
-                  <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
+                  <SelectTrigger className="bg-background text-foreground"><SelectValue /></SelectTrigger>
+                  <SelectContent className="bg-popover border-border text-popover-foreground">
                     <SelectItem value="lead">Początkowe</SelectItem>
                     <SelectItem value="qualified">Kwalifikowane</SelectItem>
                     <SelectItem value="proposal">Oferta</SelectItem>
@@ -85,16 +85,16 @@ export default function NewDealPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-zinc-300">Przewidywana data zamknięcia</Label>
-                <Input type="date" value={form.expectedCloseDate} onChange={(e) => setForm({ ...form, expectedCloseDate: e.target.value })} className="border-zinc-800 bg-zinc-900 text-white" />
+                <Label className="text-foreground/80">Przewidywana data zamknięcia</Label>
+                <Input type="date" value={form.expectedCloseDate} onChange={(e) => setForm({ ...form, expectedCloseDate: e.target.value })} className="bg-background text-foreground" />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-zinc-300">Kontakt</Label>
+                <Label className="text-foreground/80">Kontakt</Label>
                 <Select value={form.contactId} onValueChange={(v) => setForm({ ...form, contactId: v ?? "" })}>
-                  <SelectTrigger className="border-zinc-800 bg-zinc-900 text-white"><SelectValue placeholder="Wybierz kontakt" /></SelectTrigger>
-                  <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
+                  <SelectTrigger className="bg-background text-foreground"><SelectValue placeholder="Wybierz kontakt" /></SelectTrigger>
+                  <SelectContent className="bg-popover border-border text-popover-foreground">
                     <SelectItem value="">Brak</SelectItem>
                     {contacts?.data.map((c) => (
                       <SelectItem key={c.id} value={c.id}>{c.firstName} {c.lastName}</SelectItem>
@@ -103,10 +103,10 @@ export default function NewDealPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-zinc-300">Firma</Label>
+                <Label className="text-foreground/80">Firma</Label>
                 <Select value={form.companyId} onValueChange={(v) => setForm({ ...form, companyId: v ?? "" })}>
-                  <SelectTrigger className="border-zinc-800 bg-zinc-900 text-white"><SelectValue placeholder="Wybierz firmę" /></SelectTrigger>
-                  <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
+                  <SelectTrigger className="bg-background text-foreground"><SelectValue placeholder="Wybierz firmę" /></SelectTrigger>
+                  <SelectContent className="bg-popover border-border text-popover-foreground">
                     <SelectItem value="">Brak</SelectItem>
                     {companies?.data.map((c) => (
                       <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
@@ -116,10 +116,10 @@ export default function NewDealPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label className="text-zinc-300">Notatki</Label>
-              <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} className="border-zinc-800 bg-zinc-900 text-white min-h-[100px]" />
+              <Label className="text-foreground/80">Notatki</Label>
+              <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} className="bg-background text-foreground min-h-[100px]" />
             </div>
-            <Button type="submit" className="bg-white text-black hover:bg-zinc-200 cursor-pointer" disabled={createDeal.isPending}>
+            <Button type="submit" className="bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer" disabled={createDeal.isPending}>
               {createDeal.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Utwórz ofertę
             </Button>

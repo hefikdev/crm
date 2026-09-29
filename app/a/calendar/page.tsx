@@ -88,39 +88,39 @@ export default function CalendarPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Kalendarz</h1>
-          <p className="text-zinc-500 text-sm mt-1">
+          <h1 className="text-2xl font-bold text-foreground">Kalendarz</h1>
+          <p className="text-muted-foreground text-sm mt-1">
             {monthNames[currentMonth]} {currentYear}
           </p>
         </div>
         <Button
           onClick={() => router.push("/a/activities/new")}
-          className="bg-white text-black hover:bg-zinc-200 cursor-pointer"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
         >
           <Plus className="h-4 w-4 mr-2" />
           Dodaj wydarzenie
         </Button>
       </div>
 
-      <Card className="border-zinc-800 bg-zinc-950">
+      <Card className="border-border bg-card">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <Button
               variant="ghost"
               size="sm"
               onClick={prevMonth}
-              className="text-zinc-400 hover:text-white cursor-pointer"
+              className="text-muted-foreground hover:text-foreground cursor-pointer"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <CardTitle className="text-sm font-medium text-zinc-400">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
               {monthNames[currentMonth]} {currentYear}
             </CardTitle>
             <Button
               variant="ghost"
               size="sm"
               onClick={nextMonth}
-              className="text-zinc-400 hover:text-white cursor-pointer"
+              className="text-muted-foreground hover:text-foreground cursor-pointer"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -128,14 +128,14 @@ export default function CalendarPage() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <Skeleton className="h-64 bg-zinc-800" />
+            <Skeleton className="h-64 bg-accent" />
           ) : (
             <>
               <div className="grid grid-cols-7 gap-1 mb-1">
                 {dayNames.map((day) => (
                   <div
                     key={day}
-                    className="text-center text-xs text-zinc-500 font-medium py-2"
+                    className="text-center text-xs text-muted-foreground font-medium py-2"
                   >
                     {day}
                   </div>
@@ -143,7 +143,7 @@ export default function CalendarPage() {
               </div>
               <div className="grid grid-cols-7 gap-1">
                 {Array.from({ length: startDayOfWeek }).map((_, i) => (
-                  <div key={`empty-${i}`} className="min-h-24 rounded-lg bg-zinc-900/50" />
+                  <div key={`empty-${i}`} className="min-h-24 rounded-lg bg-muted/50" />
                 ))}
                 {Array.from({ length: daysInMonth }).map((_, i) => {
                   const day = i + 1;
@@ -156,15 +156,15 @@ export default function CalendarPage() {
                       className={cn(
                         "min-h-24 p-1 rounded-lg border transition-colors",
                         isToday
-                          ? "border-white bg-zinc-900"
-                          : "border-zinc-800 bg-zinc-950 hover:bg-zinc-900"
+                          ? "border-white bg-muted"
+                          : "border-border bg-card hover:bg-muted"
                       )}
                     >
                       <div className="flex items-center justify-center mb-1">
                         <span
                           className={cn(
                             "text-xs font-medium w-6 h-6 flex items-center justify-center rounded-full",
-                            isToday ? "bg-white text-black" : "text-zinc-400"
+                            isToday ? "bg-white text-black" : "text-muted-foreground"
                           )}
                         >
                           {day}
@@ -174,7 +174,7 @@ export default function CalendarPage() {
                         {dayActivities.slice(0, 3).map((activity) => (
                           <div
                             key={activity.id}
-                            className="flex items-center gap-1 px-1 py-0.5 rounded cursor-pointer hover:bg-zinc-800"
+                            className="flex items-center gap-1 px-1 py-0.5 rounded cursor-pointer hover:bg-accent"
                             onClick={() => router.push("/a/activities")}
                           >
                             <div
@@ -183,13 +183,13 @@ export default function CalendarPage() {
                                 typeColors[activity.type] ?? "bg-zinc-500"
                               )}
                             />
-                            <span className="text-[10px] text-zinc-300 truncate">
+                            <span className="text-[10px] text-foreground/80 truncate">
                               {activity.title}
                             </span>
                           </div>
                         ))}
                         {dayActivities.length > 3 && (
-                          <p className="text-[10px] text-zinc-500 text-center">
+                          <p className="text-[10px] text-muted-foreground text-center">
                             +{dayActivities.length - 3} więcej
                           </p>
                         )}
@@ -203,17 +203,17 @@ export default function CalendarPage() {
         </CardContent>
       </Card>
 
-      <Card className="border-zinc-800 bg-zinc-950">
+      <Card className="border-border bg-card">
         <CardHeader>
-          <CardTitle className="text-sm font-medium text-zinc-400">
+          <CardTitle className="text-sm font-medium text-muted-foreground">
             Nadchodzące aktywności
           </CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <Skeleton className="h-32 bg-zinc-800" />
+            <Skeleton className="h-32 bg-accent" />
           ) : activities?.data.length === 0 ? (
-            <p className="text-sm text-zinc-500 text-center py-8">
+            <p className="text-sm text-muted-foreground text-center py-8">
               Brak aktywności w tym miesiącu
             </p>
           ) : (
@@ -224,7 +224,7 @@ export default function CalendarPage() {
                 .map((activity) => (
                   <div
                     key={activity.id}
-                    className="flex items-center justify-between p-3 rounded-lg hover:bg-zinc-900 transition-colors cursor-pointer"
+                    className="flex items-center justify-between p-3 rounded-lg hover:bg-muted transition-colors cursor-pointer"
                     onClick={() => router.push("/a/activities")}
                   >
                     <div className="flex items-center gap-3">
@@ -235,10 +235,10 @@ export default function CalendarPage() {
                         )}
                       />
                       <div>
-                        <p className="text-sm font-medium text-white">
+                        <p className="text-sm font-medium text-foreground">
                           {activity.title}
                         </p>
-                        <p className="text-xs text-zinc-500">
+                        <p className="text-xs text-muted-foreground">
                           {typeLabels[activity.type] ?? activity.type}
                           {activity.dueDate &&
                             ` · ${new Date(activity.dueDate).toLocaleDateString("pl-PL")}`}
@@ -248,8 +248,8 @@ export default function CalendarPage() {
                     <Badge
                       className={
                         activity.status === "pending"
-                          ? "bg-zinc-800 text-zinc-300"
-                          : "bg-emerald-900 text-emerald-200"
+                          ? "bg-accent text-foreground/80"
+                          : "bg-emerald-500/15 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-200"
                       }
                     >
                       {activity.status === "pending" ? "Oczekuje" : "Zakończone"}

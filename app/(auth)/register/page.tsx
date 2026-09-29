@@ -44,73 +44,86 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <Card className="w-full max-w-md border-zinc-800 bg-zinc-950">
-        <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold text-white">Utwórz konto</CardTitle>
-          <CardDescription className="text-zinc-400">
-            Wprowadź dane aby rozpocząć
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name" className="text-zinc-300">Imię i nazwisko</Label>
-              <Input
-                id="name"
-                type="text"
-                placeholder="Jan Kowalski"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                className="border-zinc-800 bg-zinc-900 text-white placeholder:text-zinc-600"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-zinc-300">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="jan@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-                className="border-zinc-800 bg-zinc-900 text-white placeholder:text-zinc-600"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-zinc-300">Hasło</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                autoComplete="new-password"
-                className="border-zinc-800 bg-zinc-900 text-white placeholder:text-zinc-600"
-              />
-              <p className="text-xs text-zinc-500">
-                Minimum 8 znaków, duża litera, mała litera i cyfra
-              </p>
-            </div>
-            <Button
-              type="submit"
-              className="w-full bg-white text-black hover:bg-zinc-200 cursor-pointer"
-              disabled={loading}
-            >
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Utwórz konto"}
-            </Button>
-          </form>
-          <p className="mt-4 text-center text-sm text-zinc-500">
-            Masz już konto?{" "}
-            <Link href="/login" className="text-white hover:underline">
-              Zaloguj się
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
-    </div>
+    <Card className="w-full border-border bg-card shadow-sm">
+      <CardHeader className="space-y-1.5 text-center">
+        <CardTitle className="text-2xl font-semibold tracking-tight text-foreground">
+          Utwórz konto
+        </CardTitle>
+        <CardDescription className="text-muted-foreground">
+          Wprowadź dane, aby rozpocząć
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="name" className="text-foreground">
+              Imię i nazwisko
+            </Label>
+            <Input
+              id="name"
+              type="text"
+              placeholder="Jan Kowalski"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              className="h-10"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="email" className="text-foreground">
+              Email
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="jan@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="email"
+              className="h-10"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="password" className="text-foreground">
+              Hasło
+            </Label>
+            <Input
+              id="password"
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="new-password"
+              className="h-10"
+            />
+            <p className="text-xs text-muted-foreground">
+              Minimum 8 znaków, duża litera, mała litera i cyfra
+            </p>
+          </div>
+          <Button
+            type="submit"
+            className="w-full h-10 cursor-pointer"
+            disabled={loading}
+          >
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              "Utwórz konto"
+            )}
+          </Button>
+        </form>
+        <p className="mt-6 text-center text-sm text-muted-foreground">
+          Masz już konto?{" "}
+          <Link
+            href="/login"
+            className="font-medium text-foreground hover:underline"
+          >
+            Zaloguj się
+          </Link>
+        </p>
+      </CardContent>
+    </Card>
   );
 }

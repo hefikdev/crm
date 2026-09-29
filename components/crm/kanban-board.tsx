@@ -12,12 +12,12 @@ import { motion } from "motion/react";
 import { Plus } from "lucide-react";
 
 const stageColors: Record<string, string> = {
-  lead: "bg-zinc-800 text-zinc-300",
-  qualified: "bg-blue-900 text-blue-200",
-  proposal: "bg-amber-900 text-amber-200",
-  negotiation: "bg-purple-900 text-purple-200",
-  closed_won: "bg-emerald-900 text-emerald-200",
-  closed_lost: "bg-red-900 text-red-200",
+  lead: "bg-accent text-foreground/80",
+  qualified: "bg-blue-500/15 text-blue-700 dark:bg-blue-900 dark:text-blue-200",
+  proposal: "bg-amber-500/15 text-amber-700 dark:bg-amber-900 dark:text-amber-200",
+  negotiation: "bg-purple-500/15 text-purple-700 dark:bg-purple-900 dark:text-purple-200",
+  closed_won: "bg-emerald-500/15 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-200",
+  closed_lost: "bg-red-500/15 text-red-700 dark:bg-red-900 dark:text-red-200",
 };
 
 const stageLabels: Record<string, string> = {
@@ -56,7 +56,7 @@ export function KanbanBoard() {
     return (
       <div className="grid grid-cols-6 gap-3">
         {Array.from({ length: 6 }).map((_, i) => (
-          <Skeleton key={i} className="h-96 bg-zinc-800" />
+          <Skeleton key={i} className="h-96 bg-accent" />
         ))}
       </div>
     );
@@ -71,15 +71,15 @@ export function KanbanBoard() {
           onDragOver={(e) => e.preventDefault()}
           onDrop={(e) => handleDrop(e, column.stage)}
         >
-          <Card className="border-zinc-800 bg-zinc-950">
+          <Card className="border-border bg-card">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   {stageLabels[column.stage] ?? column.stage}
                 </CardTitle>
-                <span className="text-xs text-zinc-500">{column.deals.length}</span>
+                <span className="text-xs text-muted-foreground">{column.deals.length}</span>
               </div>
-              <p className="text-xs text-zinc-600">{column.total.toLocaleString()} PLN</p>
+              <p className="text-xs text-muted-foreground/70">{column.total.toLocaleString()} PLN</p>
             </CardHeader>
             <CardContent className="space-y-2 min-h-[200px]">
               {column.deals.map((deal) => (
@@ -91,10 +91,10 @@ export function KanbanBoard() {
                   draggable
                   onDragStart={(e) => handleDragStart(e as unknown as React.DragEvent, deal.id)}
                   onClick={() => router.push(`/a/deals/${deal.id}`)}
-                  className="p-3 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-600 transition-colors cursor-pointer"
+                  className="p-3 rounded-lg bg-muted border border-border hover:border-border transition-colors cursor-pointer"
                 >
-                  <p className="text-sm font-medium text-white truncate">{deal.title}</p>
-                  <p className="text-xs text-zinc-400 mt-1">{deal.value.toLocaleString()} PLN</p>
+                  <p className="text-sm font-medium text-foreground truncate">{deal.title}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{deal.value.toLocaleString()} PLN</p>
                   <div className="flex items-center justify-between mt-2">
                     <Badge className={stageColors[deal.stage]}>
                       {deal.probability}%
@@ -106,7 +106,7 @@ export function KanbanBoard() {
                 variant="ghost"
                 size="sm"
                 onClick={() => router.push("/a/deals/new")}
-                className="w-full text-zinc-500 hover:text-white hover:bg-zinc-800 cursor-pointer"
+                className="w-full text-muted-foreground hover:text-foreground hover:bg-accent cursor-pointer"
               >
                 <Plus className="h-3 w-3 mr-1" />
                 Dodaj

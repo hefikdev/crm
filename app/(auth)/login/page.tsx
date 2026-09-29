@@ -44,17 +44,21 @@ function LoginForm() {
   };
 
   return (
-    <Card className="w-full max-w-md border-zinc-800 bg-zinc-950">
-      <CardHeader className="space-y-1 text-center">
-        <CardTitle className="text-2xl font-bold text-white">Zaloguj się</CardTitle>
-        <CardDescription className="text-zinc-400">
-          Wprowadź dane logowania
+    <Card className="w-full border-border bg-card shadow-sm">
+      <CardHeader className="space-y-1.5 text-center">
+        <CardTitle className="text-2xl font-semibold tracking-tight text-foreground">
+          Zaloguj się
+        </CardTitle>
+        <CardDescription className="text-muted-foreground">
+          Wprowadź dane logowania, aby kontynuować
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-zinc-300">Email</Label>
+            <Label htmlFor="email" className="text-foreground">
+              Email
+            </Label>
             <Input
               id="email"
               type="email"
@@ -63,13 +67,13 @@ function LoginForm() {
               onChange={(e) => setEmail(e.target.value)}
               required
               autoComplete="email"
-              className="border-zinc-800 bg-zinc-900 text-white placeholder:text-zinc-600"
+              className="h-10"
             />
           </div>
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password" className="text-zinc-300">Hasło</Label>
-            </div>
+            <Label htmlFor="password" className="text-foreground">
+              Hasło
+            </Label>
             <Input
               id="password"
               type="password"
@@ -78,20 +82,27 @@ function LoginForm() {
               onChange={(e) => setPassword(e.target.value)}
               required
               autoComplete="current-password"
-              className="border-zinc-800 bg-zinc-900 text-white placeholder:text-zinc-600"
+              className="h-10"
             />
           </div>
           <Button
             type="submit"
-            className="w-full bg-white text-black hover:bg-zinc-200 cursor-pointer"
+            className="w-full h-10 cursor-pointer"
             disabled={loading}
           >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Zaloguj się"}
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              "Zaloguj się"
+            )}
           </Button>
         </form>
-        <p className="mt-4 text-center text-sm text-zinc-500">
+        <p className="mt-6 text-center text-sm text-muted-foreground">
           Nie masz konta?{" "}
-          <Link href="/register" className="text-white hover:underline">
+          <Link
+            href="/register"
+            className="font-medium text-foreground hover:underline"
+          >
             Zarejestruj się
           </Link>
         </p>
@@ -102,17 +113,21 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <Suspense fallback={
-        <Card className="w-full max-w-md border-zinc-800 bg-zinc-950">
-          <CardHeader className="space-y-1 text-center">
-            <CardTitle className="text-2xl font-bold text-white">Zaloguj się</CardTitle>
-            <CardDescription className="text-zinc-400">Ładowanie...</CardDescription>
+    <Suspense
+      fallback={
+        <Card className="w-full border-border bg-card shadow-sm">
+          <CardHeader className="space-y-1.5 text-center">
+            <CardTitle className="text-2xl font-semibold tracking-tight text-foreground">
+              Zaloguj się
+            </CardTitle>
+            <CardDescription className="text-muted-foreground">
+              Ładowanie...
+            </CardDescription>
           </CardHeader>
         </Card>
-      }>
-        <LoginForm />
-      </Suspense>
-    </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

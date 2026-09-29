@@ -12,8 +12,8 @@ export function DashboardCharts() {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Skeleton className="h-64 bg-zinc-800" />
-        <Skeleton className="h-64 bg-zinc-800" />
+        <Skeleton className="h-64 bg-accent" />
+        <Skeleton className="h-64 bg-accent" />
       </div>
     );
   }
@@ -22,9 +22,9 @@ export function DashboardCharts() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <Card className="border-zinc-800 bg-zinc-950">
+      <Card className="border-border bg-card">
         <CardHeader>
-          <CardTitle className="text-sm font-medium text-zinc-400">
+          <CardTitle className="text-sm font-medium text-muted-foreground">
             Pipeline sprzedaży
           </CardTitle>
         </CardHeader>
@@ -33,7 +33,7 @@ export function DashboardCharts() {
             {pipeline?.map((column) => (
               <div key={column.stage} className="space-y-1">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-zinc-300 capitalize">
+                  <span className="text-foreground/80 capitalize">
                     {column.stage === "closed_won"
                       ? "Zrealizowane"
                       : column.stage === "closed_lost"
@@ -46,9 +46,9 @@ export function DashboardCharts() {
                               ? "Oferta"
                               : "Negocjacje"}
                   </span>
-                  <span className="text-zinc-500">{column.total.toLocaleString()} PLN</span>
+                  <span className="text-muted-foreground">{column.total.toLocaleString()} PLN</span>
                 </div>
-                <div className="h-2 rounded-full bg-zinc-800 overflow-hidden">
+                <div className="h-2 rounded-full bg-accent overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all duration-500 ${
                       column.stage === "closed_won"
@@ -66,35 +66,35 @@ export function DashboardCharts() {
         </CardContent>
       </Card>
 
-      <Card className="border-zinc-800 bg-zinc-950">
+      <Card className="border-border bg-card">
         <CardHeader>
-          <CardTitle className="text-sm font-medium text-zinc-400">
+          <CardTitle className="text-sm font-medium text-muted-foreground">
             Podsumowanie
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-900">
+          <div className="flex items-center justify-between p-3 rounded-lg bg-muted">
             <div>
-              <p className="text-sm text-zinc-400">Wartość pipeline</p>
-              <p className="text-lg font-bold text-white">
+              <p className="text-sm text-muted-foreground">Wartość pipeline</p>
+              <p className="text-lg font-bold text-foreground">
                 {(stats?.pipelineValue ?? 0).toLocaleString()} PLN
               </p>
             </div>
             <TrendingUp className="h-5 w-5 text-emerald-400" />
           </div>
-          <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-900">
+          <div className="flex items-center justify-between p-3 rounded-lg bg-muted">
             <div>
-              <p className="text-sm text-zinc-400">Zrealizowane</p>
+              <p className="text-sm text-muted-foreground">Zrealizowane</p>
               <p className="text-lg font-bold text-emerald-400">
                 {(stats?.wonValue ?? 0).toLocaleString()} PLN
               </p>
             </div>
             <TrendingUp className="h-5 w-5 text-emerald-400" />
           </div>
-          <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-900">
+          <div className="flex items-center justify-between p-3 rounded-lg bg-muted">
             <div>
-              <p className="text-sm text-zinc-400">Oczekujące aktywności</p>
-              <p className="text-lg font-bold text-white">{stats?.pendingActivities ?? 0}</p>
+              <p className="text-sm text-muted-foreground">Oczekujące aktywności</p>
+              <p className="text-lg font-bold text-foreground">{stats?.pendingActivities ?? 0}</p>
             </div>
           </div>
         </CardContent>

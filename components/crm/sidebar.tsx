@@ -19,6 +19,8 @@ import {
   ClipboardCheck,
   FileText,
   Mail,
+  TrendingUp,
+  FolderOpen,
 } from "lucide-react";
 import { QuickCreateModal } from "@/components/crm/quick-create";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -31,10 +33,12 @@ const navItems = [
   { href: "/a/contacts", label: "Kontakty", icon: Users },
   { href: "/a/companies", label: "Firmy", icon: Building2 },
   { href: "/a/deals", label: "Oferty", icon: DollarSign },
+  { href: "/a/forecast", label: "Prognoza", icon: TrendingUp },
   { href: "/a/tasks", label: "Zadania", icon: ClipboardCheck },
   { href: "/a/calendar", label: "Kalendarz", icon: Calendar },
   { href: "/a/notes", label: "Notatki", icon: FileText },
   { href: "/a/inbox", label: "Wiadomości", icon: Mail },
+  { href: "/a/files", label: "Pliki", icon: FolderOpen },
   { href: "/a/reports", label: "Raporty", icon: BarChart3 },
   { href: "/a/activities", label: "Aktywności", icon: CalendarClock },
   { href: "/a/settings", label: "Ustawienia", icon: Settings },
@@ -65,13 +69,13 @@ export function Sidebar({ userName, userEmail }: { userName: string; userEmail: 
   return (
     <aside
       className={cn(
-        "flex flex-col border-r border-zinc-800 bg-zinc-950 transition-all duration-200",
+        "flex flex-col border-r border-border bg-card transition-all duration-200",
         collapsed ? "w-16" : "w-60"
       )}
     >
-      <div className="flex items-center justify-between p-4 border-b border-zinc-800">
+      <div className="flex items-center justify-between p-4 border-b border-border">
         {!collapsed && (
-          <Link href="/a" className="text-lg font-bold text-white tracking-tight">
+          <Link href="/a" className="text-lg font-bold text-foreground tracking-tight">
             CRM
           </Link>
         )}
@@ -79,7 +83,7 @@ export function Sidebar({ userName, userEmail }: { userName: string; userEmail: 
           variant="ghost"
           size="icon"
           onClick={() => setCollapsed(!collapsed)}
-          className="text-zinc-400 hover:text-white hover:bg-zinc-800 cursor-pointer"
+          className="text-muted-foreground hover:text-foreground hover:bg-accent cursor-pointer"
         >
           {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </Button>
@@ -99,8 +103,8 @@ export function Sidebar({ userName, userEmail }: { userName: string; userEmail: 
               className={cn(
                 "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer",
                 isActive
-                  ? "bg-white text-black font-medium"
-                  : "text-zinc-400 hover:text-white hover:bg-zinc-800"
+                  ? "bg-primary text-primary-foreground font-medium"
+                  : "text-muted-foreground hover:text-foreground hover:bg-accent"
               )}
             >
               <item.icon className="h-4 w-4 shrink-0" />
@@ -110,17 +114,17 @@ export function Sidebar({ userName, userEmail }: { userName: string; userEmail: 
         })}
       </nav>
 
-      <div className="p-3 border-t border-zinc-800">
+      <div className="p-3 border-t border-border">
         <div className={cn("flex items-center gap-3", collapsed && "justify-center")}>
           <Avatar className="h-8 w-8">
-            <AvatarFallback className="bg-zinc-800 text-zinc-300 text-xs">
+            <AvatarFallback className="bg-accent text-foreground/80 text-xs">
               {initials}
             </AvatarFallback>
           </Avatar>
           {!collapsed && (
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white truncate">{userName}</p>
-              <p className="text-xs text-zinc-500 truncate">{userEmail}</p>
+              <p className="text-sm font-medium text-foreground truncate">{userName}</p>
+              <p className="text-xs text-muted-foreground truncate">{userEmail}</p>
             </div>
           )}
         </div>
@@ -129,7 +133,7 @@ export function Sidebar({ userName, userEmail }: { userName: string; userEmail: 
           size="sm"
           onClick={handleSignOut}
           className={cn(
-            "mt-2 text-zinc-400 hover:text-white hover:bg-zinc-800 cursor-pointer",
+            "mt-2 text-muted-foreground hover:text-foreground hover:bg-accent cursor-pointer",
             collapsed ? "w-full justify-center px-0" : "w-full justify-start"
           )}
         >

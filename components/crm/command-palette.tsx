@@ -23,7 +23,8 @@ import {
   FileText,
   Mail,
   Plus,
-  Search,
+  TrendingUp,
+  FolderOpen,
 } from "lucide-react";
 
 const pages = [
@@ -31,10 +32,12 @@ const pages = [
   { href: "/a/contacts", label: "Kontakty", icon: Users, keywords: "contacts kontakty osoby" },
   { href: "/a/companies", label: "Firmy", icon: Building2, keywords: "companies firmy" },
   { href: "/a/deals", label: "Oferty", icon: DollarSign, keywords: "deals oferty sprzedaz" },
+  { href: "/a/forecast", label: "Prognoza", icon: TrendingUp, keywords: "forecast prognoza sprzedaz" },
   { href: "/a/tasks", label: "Zadania", icon: ClipboardCheck, keywords: "tasks zadania" },
   { href: "/a/calendar", label: "Kalendarz", icon: Calendar, keywords: "calendar kalendarz" },
   { href: "/a/notes", label: "Notatki", icon: FileText, keywords: "notes notatki" },
   { href: "/a/inbox", label: "Wiadomości", icon: Mail, keywords: "inbox wiadomosci email" },
+  { href: "/a/files", label: "Pliki", icon: FolderOpen, keywords: "files pliki dokumenty" },
   { href: "/a/reports", label: "Raporty", icon: BarChart3, keywords: "reports raporty statystyki" },
   { href: "/a/activities", label: "Aktywności", icon: CalendarClock, keywords: "activities aktywnosci" },
   { href: "/a/settings", label: "Ustawienia", icon: Settings, keywords: "settings ustawienia konto" },

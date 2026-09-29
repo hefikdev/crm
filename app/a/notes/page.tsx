@@ -34,7 +34,6 @@ export default function NotesPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const { data, isLoading, refetch } = trpc.activities.list.useQuery({
-    search: undefined,
     status: "all",
     type: "note",
     limit: 50,
@@ -113,8 +112,8 @@ export default function NotesPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Notatki</h1>
-          <p className="text-zinc-500 text-sm mt-1">
+          <h1 className="text-2xl font-bold text-foreground">Notatki</h1>
+          <p className="text-muted-foreground text-sm mt-1">
             {filteredNotes.length} notatek
           </p>
         </div>
@@ -125,7 +124,7 @@ export default function NotesPage() {
             setTitle("");
             setDescription("");
           }}
-          className="bg-white text-black hover:bg-zinc-200 cursor-pointer"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
         >
           <Plus className="h-4 w-4 mr-2" />
           {showForm ? "Anuluj" : "Nowa notatka"}
@@ -133,34 +132,34 @@ export default function NotesPage() {
       </div>
 
       {showForm && (
-        <Card className="border-zinc-800 bg-zinc-950">
+        <Card className="border-border bg-card">
           <CardHeader>
-            <CardTitle className="text-white">
+            <CardTitle className="text-foreground">
               {editingId ? "Edytuj notatkę" : "Nowa notatka"}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-zinc-300">Tytuł</Label>
+              <Label className="text-foreground/80">Tytuł</Label>
               <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Tytuł notatki"
-                className="border-zinc-800 bg-zinc-900 text-white"
+                className="bg-background text-foreground"
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-zinc-300">Treść</Label>
+              <Label className="text-foreground/80">Treść</Label>
               <Textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Treść notatki..."
-                className="border-zinc-800 bg-zinc-900 text-white min-h-[200px]"
+                className="border-border bg-muted text-foreground min-h-[200px]"
               />
             </div>
             <Button
               onClick={handleSave}
-              className="bg-white text-black hover:bg-zinc-200 cursor-pointer"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
               disabled={createNote.isPending || updateNote.isPending}
             >
               {(createNote.isPending || updateNote.isPending) ? (
@@ -175,43 +174,43 @@ export default function NotesPage() {
       )}
 
       <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Szukaj notatek..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-9 border-zinc-800 bg-zinc-900 text-white placeholder:text-zinc-600"
+          className="pl-9 border-border bg-muted text-foreground placeholder:text-muted-foreground/70"
         />
       </div>
 
       {isLoading ? (
         <div className="space-y-3">
           {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-24 bg-zinc-800" />
+            <Skeleton key={i} className="h-24 bg-accent" />
           ))}
         </div>
       ) : filteredNotes.length === 0 ? (
         <div className="text-center py-12">
-          <FileText className="h-12 w-12 text-zinc-700 mx-auto mb-3" />
-          <p className="text-zinc-500">Brak notatek</p>
+          <FileText className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
+          <p className="text-muted-foreground">Brak notatek</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredNotes.map((note) => (
             <Card
               key={note.id}
-              className="border-zinc-800 bg-zinc-950 hover:bg-zinc-900 transition-colors cursor-pointer"
+              className="border-border bg-card hover:bg-muted transition-colors cursor-pointer"
               onClick={() => handleEdit(note)}
             >
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-medium text-white truncate">
+                  <CardTitle className="text-sm font-medium text-foreground truncate">
                     {note.title}
                   </CardTitle>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="text-zinc-400 hover:text-red-400 cursor-pointer"
+                    className="text-muted-foreground hover:text-red-400 cursor-pointer"
                     onClick={(e) => {
                       e.stopPropagation();
                       if (confirm("Usunąć notatkę?")) deleteNote.mutate({ id: note.id });
@@ -222,10 +221,10 @@ export default function NotesPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-zinc-500 line-clamp-3">
+                <p className="text-sm text-muted-foreground line-clamp-3">
                   {note.description ?? "Brak treści"}
                 </p>
-                <p className="text-xs text-zinc-600 mt-2">
+                <p className="text-xs text-muted-foreground/70 mt-2">
                   {new Date(note.createdAt).toLocaleDateString("pl-PL", {
                     day: "numeric",
                     month: "long",

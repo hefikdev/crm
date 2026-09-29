@@ -123,30 +123,32 @@ export function QuickCreateModal() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button
-          size="sm"
-          className="bg-white text-black hover:bg-zinc-200 cursor-pointer w-full"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Szybkie dodawanie
-        </Button>
+      <DialogTrigger
+        render={
+          <Button
+            size="sm"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer w-full"
+          />
+        }
+      >
+        <Plus className="h-4 w-4 mr-2" />
+        Szybkie dodawanie
       </DialogTrigger>
-      <DialogContent className="bg-zinc-950 border-zinc-800 text-white sm:max-w-md">
+      <DialogContent className="bg-popover border-border text-popover-foreground sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-white">Szybkie dodawanie</DialogTitle>
+          <DialogTitle className="text-foreground">Szybkie dodawanie</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label className="text-zinc-300">Typ</Label>
+            <Label className="text-foreground/80">Typ</Label>
             <Select
               value={type}
               onValueChange={(v) => setType(v as typeof type)}
             >
-              <SelectTrigger className="border-zinc-800 bg-zinc-900 text-white">
+              <SelectTrigger className="border-border bg-muted text-foreground">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
+              <SelectContent className="bg-popover border-border text-popover-foreground">
                 <SelectItem value="contact">Kontakt</SelectItem>
                 <SelectItem value="deal">Oferta</SelectItem>
                 <SelectItem value="activity">Aktywność</SelectItem>
@@ -154,7 +156,7 @@ export function QuickCreateModal() {
             </Select>
           </div>
           <div className="space-y-2">
-            <Label className="text-zinc-300">
+            <Label className="text-foreground/80">
               {type === "contact"
                 ? "Imię i nazwisko"
                 : type === "deal"
@@ -171,31 +173,31 @@ export function QuickCreateModal() {
                     ? "Sprzedaż produktu X"
                     : "Spotkanie z klientem"
               }
-              className="border-zinc-800 bg-zinc-900 text-white"
+              className="border-border bg-muted text-foreground"
               autoFocus
             />
           </div>
           {type === "contact" && (
             <div className="space-y-2">
-              <Label className="text-zinc-300">Email</Label>
+              <Label className="text-foreground/80">Email</Label>
               <Input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="jan@example.com"
-                className="border-zinc-800 bg-zinc-900 text-white"
+                className="border-border bg-muted text-foreground"
               />
             </div>
           )}
           {type === "deal" && (
             <div className="space-y-2">
-              <Label className="text-zinc-300">Wartość (PLN)</Label>
+              <Label className="text-foreground/80">Wartość (PLN)</Label>
               <Input
                 type="number"
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
                 placeholder="10000"
-                className="border-zinc-800 bg-zinc-900 text-white"
+                className="border-border bg-muted text-foreground"
               />
             </div>
           )}
@@ -204,13 +206,13 @@ export function QuickCreateModal() {
               type="button"
               variant="outline"
               onClick={() => setOpen(false)}
-              className="flex-1 border-zinc-800 text-zinc-400 hover:text-white cursor-pointer"
+              className="flex-1 border-border text-muted-foreground hover:text-foreground cursor-pointer"
             >
               Anuluj
             </Button>
             <Button
               type="submit"
-              className="flex-1 bg-white text-black hover:bg-zinc-200 cursor-pointer"
+              className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
               disabled={createContact.isPending || createDeal.isPending || createActivity.isPending}
             >
               {(createContact.isPending || createDeal.isPending || createActivity.isPending) ? (
@@ -222,8 +224,8 @@ export function QuickCreateModal() {
           </div>
         </form>
 
-        <div className="border-t border-zinc-800 pt-4 mt-2">
-          <p className="text-xs text-zinc-500 mb-2">Szybkie przejścia</p>
+        <div className="border-t border-border pt-4 mt-2">
+          <p className="text-xs text-muted-foreground mb-2">Szybkie przejścia</p>
           <div className="grid grid-cols-2 gap-2">
             {actions.map((action) => (
               <Button
@@ -234,7 +236,7 @@ export function QuickCreateModal() {
                   setOpen(false);
                   router.push(action.href);
                 }}
-                className="justify-start text-zinc-400 hover:text-white hover:bg-zinc-800 cursor-pointer"
+                className="justify-start text-muted-foreground hover:text-foreground hover:bg-accent cursor-pointer"
               >
                 <action.icon className={`h-3.5 w-3.5 mr-2 ${action.color}`} />
                 {action.label}

@@ -17,12 +17,12 @@ import {
 } from "lucide-react";
 
 const typeColors: Record<string, string> = {
-  task: "bg-emerald-900 text-emerald-200",
-  call: "bg-blue-900 text-blue-200",
-  email: "bg-amber-900 text-amber-200",
-  meeting: "bg-purple-900 text-purple-200",
-  follow_up: "bg-rose-900 text-rose-200",
-  note: "bg-zinc-800 text-zinc-300",
+  task: "bg-emerald-500/15 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-200",
+  call: "bg-blue-500/15 text-blue-700 dark:bg-blue-900 dark:text-blue-200",
+  email: "bg-amber-500/15 text-amber-700 dark:bg-amber-900 dark:text-amber-200",
+  meeting: "bg-purple-500/15 text-purple-700 dark:bg-purple-900 dark:text-purple-200",
+  follow_up: "bg-rose-500/15 text-rose-700 dark:bg-rose-900 dark:text-rose-200",
+  note: "bg-accent text-foreground/80",
 };
 
 export default function TasksPage() {
@@ -54,8 +54,8 @@ export default function TasksPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Zadania</h1>
-          <p className="text-zinc-500 text-sm mt-1">
+          <h1 className="text-2xl font-bold text-foreground">Zadania</h1>
+          <p className="text-muted-foreground text-sm mt-1">
             {pendingCount} oczekujących
             {overdueCount > 0 && (
               <span className="text-red-400 ml-2">
@@ -66,7 +66,7 @@ export default function TasksPage() {
         </div>
         <Button
           onClick={() => router.push("/a/activities/new")}
-          className="bg-white text-black hover:bg-zinc-200 cursor-pointer"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
         >
           <Plus className="h-4 w-4 mr-2" />
           Dodaj zadanie
@@ -75,11 +75,11 @@ export default function TasksPage() {
 
       <div className="flex gap-3">
         <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-zinc-500" />
+          <Filter className="h-4 w-4 text-muted-foreground" />
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-900 text-white text-sm cursor-pointer"
+            className="px-3 py-2 rounded-lg border border-border bg-muted text-foreground text-sm cursor-pointer"
           >
             <option value="pending">Oczekujące</option>
             <option value="completed">Zakończone</option>
@@ -89,7 +89,7 @@ export default function TasksPage() {
         <select
           value={filterType}
           onChange={(e) => setFilterType(e.target.value)}
-          className="px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-900 text-white text-sm cursor-pointer"
+          className="px-3 py-2 rounded-lg border border-border bg-muted text-foreground text-sm cursor-pointer"
         >
           <option value="all">Wszystkie typy</option>
           <option value="task">Zadania</option>
@@ -100,28 +100,28 @@ export default function TasksPage() {
         </select>
       </div>
 
-      <Card className="border-zinc-800 bg-zinc-950">
+      <Card className="border-border bg-card">
         <CardContent className="p-0">
           {isLoading ? (
             <div className="p-4 space-y-3">
               {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className="h-16 bg-zinc-800" />
+                <Skeleton key={i} className="h-16 bg-accent" />
               ))}
             </div>
           ) : data?.data.length === 0 ? (
             <div className="text-center py-12">
-              <CalendarClock className="h-12 w-12 text-zinc-700 mx-auto mb-3" />
-              <p className="text-zinc-500">Brak zadań</p>
+              <CalendarClock className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
+              <p className="text-muted-foreground">Brak zadań</p>
               <Button
                 variant="link"
                 onClick={() => router.push("/a/activities/new")}
-                className="text-white cursor-pointer"
+                className="text-foreground cursor-pointer"
               >
                 Utwórz pierwsze zadanie
               </Button>
             </div>
           ) : (
-            <div className="divide-y divide-zinc-800">
+            <div className="divide-y divide-border">
               {data?.data.map((task) => {
                 const isOverdue =
                   task.status === "pending" &&
@@ -133,8 +133,8 @@ export default function TasksPage() {
                     key={task.id}
                     className={`flex items-center justify-between p-4 transition-colors ${
                       task.status === "completed"
-                        ? "bg-zinc-900/50"
-                        : "hover:bg-zinc-900"
+                        ? "bg-muted/50"
+                        : "hover:bg-muted"
                     }`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
@@ -146,24 +146,24 @@ export default function TasksPage() {
                         }}
                         className={"shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors cursor-pointer " + (task.status === "completed"
                             ? "bg-emerald-500 border-emerald-500"
-                            : "border-zinc-600 hover:border-emerald-500")}
+                            : "border-border hover:border-emerald-500")}
                       >
                         {task.status === "completed" && (
-                          <CheckCircle2 className="h-3 w-3 text-white" />
+                          <CheckCircle2 className="h-3 w-3 text-foreground" />
                         )}
                       </button>
                       <div className="min-w-0">
                         <p
                           className={`text-sm font-medium truncate ${
                             task.status === "completed"
-                              ? "text-zinc-500 line-through"
-                              : "text-white"
+                              ? "text-muted-foreground line-through"
+                              : "text-foreground"
                           }`}
                         >
                           {task.title}
                         </p>
-                        <div className="flex items-center gap-2 text-xs text-zinc-500 mt-0.5">
-                          <Badge className={typeColors[task.type] ?? "bg-zinc-800 text-zinc-300"}>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                          <Badge className={typeColors[task.type] ?? "bg-accent text-foreground/80"}>
                             {task.type === "call"
                               ? "Telefon"
                               : task.type === "email"
@@ -179,7 +179,7 @@ export default function TasksPage() {
                           {task.dueDate && (
                             <span
                               className={`flex items-center gap-1 ${
-                                isOverdue ? "text-red-400" : "text-zinc-500"
+                                isOverdue ? "text-red-400" : "text-muted-foreground"
                               }`}
                             >
                               <Clock className="h-3 w-3" />
@@ -193,15 +193,15 @@ export default function TasksPage() {
                       <Badge
                         className={
                           isOverdue
-                            ? "bg-red-900 text-red-200"
-                            : "bg-zinc-800 text-zinc-300"
+                            ? "bg-red-500/15 text-red-700 dark:bg-red-900 dark:text-red-200"
+                            : "bg-accent text-foreground/80"
                         }
                       >
                         {isOverdue ? "Po terminie" : "Oczekuje"}
                       </Badge>
                     )}
                     {task.status === "completed" && task.completedAt && (
-                      <span className="text-xs text-zinc-600">
+                      <span className="text-xs text-muted-foreground/70">
                         {new Date(task.completedAt).toLocaleDateString("pl-PL")}
                       </span>
                     )}

@@ -43,11 +43,11 @@ export default function CompaniesPage() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Firmy</h1>
-          <p className="text-zinc-500 text-sm mt-1">{data?.total ?? 0} firm</p>
+          <h1 className="text-2xl font-bold text-foreground">Firmy</h1>
+          <p className="text-muted-foreground text-sm mt-1">{data?.total ?? 0} firm</p>
         </div>
         <Link href="/a/companies/new">
-          <Button className="bg-white text-black hover:bg-zinc-200 cursor-pointer">
+          <Button className="bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer">
             <Plus className="h-4 w-4 mr-2" />
             Dodaj firmę
           </Button>
@@ -56,18 +56,18 @@ export default function CompaniesPage() {
 
       <div className="flex gap-3">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Szukaj firm..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            className="pl-9 border-zinc-800 bg-zinc-900 text-white placeholder:text-zinc-600"
+            className="pl-9 border-border bg-muted text-foreground placeholder:text-muted-foreground/70"
           />
         </div>
         <select
           value={status}
           onChange={(e) => { setStatus(e.target.value); setPage(1); }}
-          className="px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-900 text-white text-sm cursor-pointer"
+          className="px-3 py-2 rounded-lg border border-border bg-muted text-foreground text-sm cursor-pointer"
         >
           <option value="all">Wszystkie</option>
           <option value="active">Aktywne</option>
@@ -77,33 +77,33 @@ export default function CompaniesPage() {
         </select>
       </div>
 
-      <Card className="border-zinc-800 bg-zinc-950">
+      <Card className="border-border bg-card">
         <CardContent className="p-0">
           {isLoading ? (
             <div className="p-4 space-y-3">
               {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className="h-16 bg-zinc-800" />
+                <Skeleton key={i} className="h-16 bg-accent" />
               ))}
             </div>
           ) : data?.data.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-zinc-500">Brak firm</p>
+              <p className="text-muted-foreground">Brak firm</p>
             </div>
           ) : (
-            <div className="divide-y divide-zinc-800">
+            <div className="divide-y divide-border">
               {data?.data.map((company) => (
                 <div
                   key={company.id}
-                  className="flex items-center justify-between p-4 hover:bg-zinc-900 transition-colors cursor-pointer"
+                  className="flex items-center justify-between p-4 hover:bg-muted transition-colors cursor-pointer"
                   onClick={() => router.push(`/a/companies/${company.id}`)}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="h-10 w-10 rounded-lg bg-zinc-800 flex items-center justify-center text-sm font-medium text-zinc-300 shrink-0">
+                    <div className="h-10 w-10 rounded-lg bg-accent flex items-center justify-center text-sm font-medium text-foreground/80 shrink-0">
                       {company.name[0]}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-white truncate">{company.name}</p>
-                      <div className="flex items-center gap-2 text-xs text-zinc-500">
+                      <p className="text-sm font-medium text-foreground truncate">{company.name}</p>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         {company.industry && <span>{company.industry}</span>}
                         {company.city && <span>{company.city}</span>}
                       </div>
@@ -111,22 +111,24 @@ export default function CompaniesPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge className={
-                      company.status === "active" ? "bg-emerald-900 text-emerald-200" :
-                      "bg-zinc-800 text-zinc-300"
+                      company.status === "active" ? "bg-emerald-500/15 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-200" :
+                      "bg-accent text-foreground/80"
                     }>
                       {company.status === "active" ? "Aktywna" : "Nieaktywna"}
                     </Badge>
                     <DropdownMenu>
-                      <DropdownMenuTrigger>
-                        <Button variant="ghost" size="icon" className="text-zinc-400 hover:text-white cursor-pointer">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
+                      <DropdownMenuTrigger
+                        render={
+                          <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground cursor-pointer" />
+                        }
+                      >
+                        <MoreHorizontal className="h-4 w-4" />
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent className="bg-zinc-900 border-zinc-800 text-white">
-                        <DropdownMenuItem className="cursor-pointer hover:bg-zinc-800" onClick={(e) => { e.stopPropagation(); router.push(`/a/companies/${company.id}`); }}>
+                      <DropdownMenuContent className="bg-popover border-border text-popover-foreground">
+                        <DropdownMenuItem className="cursor-pointer hover:bg-accent" onClick={(e) => { e.stopPropagation(); router.push(`/a/companies/${company.id}`); }}>
                           Edytuj
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-400 cursor-pointer hover:bg-zinc-800" onClick={(e) => { e.stopPropagation(); if (confirm("Usunąć?")) deleteCompany.mutate({ id: company.id }); }}>
+                        <DropdownMenuItem className="text-red-400 cursor-pointer hover:bg-accent" onClick={(e) => { e.stopPropagation(); if (confirm("Usunąć?")) deleteCompany.mutate({ id: company.id }); }}>
                           Usuń
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -141,9 +143,9 @@ export default function CompaniesPage() {
 
       {data && data.totalPages > 1 && (
         <div className="flex items-center justify-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="border-zinc-800 text-zinc-400 cursor-pointer">Poprzednia</Button>
-          <span className="text-sm text-zinc-500">Strona {page} z {data.totalPages}</span>
-          <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(data.totalPages, p + 1))} disabled={page === data.totalPages} className="border-zinc-800 text-zinc-400 cursor-pointer">Następna</Button>
+          <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="border-border text-muted-foreground cursor-pointer">Poprzednia</Button>
+          <span className="text-sm text-muted-foreground">Strona {page} z {data.totalPages}</span>
+          <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(data.totalPages, p + 1))} disabled={page === data.totalPages} className="border-border text-muted-foreground cursor-pointer">Następna</Button>
         </div>
       )}
     </div>

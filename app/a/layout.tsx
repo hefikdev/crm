@@ -19,12 +19,12 @@ export default async function CRMLayout({
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-black">
+    <div className="flex h-screen overflow-hidden bg-background">
       <Sidebar
         userName={session.user.name}
         userEmail={session.user.email}
       />
-      <main className="flex-1 overflow-y-auto bg-zinc-950">
+      <main className="flex-1 overflow-y-auto bg-background">
         <TopBar />
         {children}
       </main>
