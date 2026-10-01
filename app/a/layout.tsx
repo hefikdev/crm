@@ -1,0 +1,34 @@
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { Sidebar } from "@/components/crm/sidebar";
+import { TopBar } from "@/components/crm/top-bar";
+import { CommandPalette } from "@/components/crm/command-palette";
+import { redirect } from "next/navigation";
+
+export default async function CRMLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user) {
+    redirect("/login");
+  }
+
+  return (
+    <div className="flex h-screen overflow-hidden bg-black">
+      <Sidebar
+        userName={session.user.name}
+        userEmail={session.user.email}
+      />
+      <main className="flex-1 overflow-y-auto bg-zinc-950">
+        <TopBar />
+        {children}
+      </main>
+      <CommandPalette />
+    </div>
+  );
+}
