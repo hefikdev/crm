@@ -21,6 +21,9 @@ import {
   Mail,
   TrendingUp,
   FolderOpen,
+  Flame,
+  History,
+  Info,
 } from "lucide-react";
 import { QuickCreateModal } from "@/components/crm/quick-create";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -30,17 +33,20 @@ import { toast } from "sonner";
 
 const navItems = [
   { href: "/a", label: "Panel", icon: LayoutDashboard },
+  { href: "/a/priorities", label: "Priorytety", icon: Flame },
   { href: "/a/contacts", label: "Kontakty", icon: Users },
   { href: "/a/companies", label: "Firmy", icon: Building2 },
   { href: "/a/deals", label: "Oferty", icon: DollarSign },
   { href: "/a/forecast", label: "Prognoza", icon: TrendingUp },
   { href: "/a/tasks", label: "Zadania", icon: ClipboardCheck },
   { href: "/a/calendar", label: "Kalendarz", icon: Calendar },
+  { href: "/a/timeline", label: "Os czasu", icon: History },
   { href: "/a/notes", label: "Notatki", icon: FileText },
   { href: "/a/inbox", label: "Wiadomości", icon: Mail },
   { href: "/a/files", label: "Pliki", icon: FolderOpen },
   { href: "/a/reports", label: "Raporty", icon: BarChart3 },
   { href: "/a/activities", label: "Aktywności", icon: CalendarClock },
+  { href: "/a/about", label: "O systemie", icon: Info },
   { href: "/a/settings", label: "Ustawienia", icon: Settings },
 ];
 

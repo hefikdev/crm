@@ -26,21 +26,27 @@ import {
   Plus,
   TrendingUp,
   FolderOpen,
+  Flame,
+  History,
+  Info,
 } from "lucide-react";
 
 const pages = [
   { href: "/a", label: "Panel główny", icon: LayoutDashboard, keywords: "dashboard panel home" },
+  { href: "/a/priorities", label: "Priorytety", icon: Flame, keywords: "priorities priorytety dzisiaj" },
   { href: "/a/contacts", label: "Kontakty", icon: Users, keywords: "contacts kontakty osoby" },
   { href: "/a/companies", label: "Firmy", icon: Building2, keywords: "companies firmy" },
   { href: "/a/deals", label: "Oferty", icon: DollarSign, keywords: "deals oferty sprzedaz" },
   { href: "/a/forecast", label: "Prognoza", icon: TrendingUp, keywords: "forecast prognoza sprzedaz" },
   { href: "/a/tasks", label: "Zadania", icon: ClipboardCheck, keywords: "tasks zadania" },
   { href: "/a/calendar", label: "Kalendarz", icon: Calendar, keywords: "calendar kalendarz" },
+  { href: "/a/timeline", label: "Os czasu", icon: History, keywords: "timeline historia os czasu" },
   { href: "/a/notes", label: "Notatki", icon: FileText, keywords: "notes notatki" },
   { href: "/a/inbox", label: "Wiadomości", icon: Mail, keywords: "inbox wiadomosci email" },
   { href: "/a/files", label: "Pliki", icon: FolderOpen, keywords: "files pliki dokumenty" },
   { href: "/a/reports", label: "Raporty", icon: BarChart3, keywords: "reports raporty statystyki" },
   { href: "/a/activities", label: "Aktywności", icon: CalendarClock, keywords: "activities aktywnosci" },
+  { href: "/a/about", label: "O systemie", icon: Info, keywords: "about o systemie info roadmap" },
   { href: "/a/settings", label: "Ustawienia", icon: Settings, keywords: "settings ustawienia konto" },
 ];
 
