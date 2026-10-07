@@ -39,6 +39,17 @@ export const auth = betterAuth({
     minPasswordLength: 8,
     maxPasswordLength: 128,
   },
+  databaseHooks: {
+    user: {
+      create: {
+        // Every new account gets its own demo dataset so the CRM is never empty.
+        after: async (user) => {
+          const { seedForUser } = await import("@/db/seed");
+          await seedForUser(user.id);
+        },
+      },
+    },
+  },
   secret: process.env.BETTER_AUTH_SECRET!,
   baseURL: process.env.BETTER_AUTH_URL!,
   trustedOrigins: [process.env.NEXT_PUBLIC_APP_URL!].filter(Boolean),

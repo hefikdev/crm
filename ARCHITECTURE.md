@@ -97,11 +97,24 @@ Profesjonalny system CRM zbudowany na Next.js 16, tRPC, Drizzle ORM i Better Aut
 
 ## Strategia bezpieczeństwa
 
+> Aplikacja o podwyższonym rygorze bezpieczeństwa — projektowana zgodnie z OWASP
+> Top 10 i zasadą defense-in-depth. Poniżej praktyki stosowane w kodzie.
+
 - **Better Auth**: Sesje bazodanowe z HTTP-only cookies
 - **Middleware**: Ochrona tras, nagłówki bezpieczeństwa
 - **Zod**: Walidacja wszystkich danych wejściowych po stronie serwera
-- **Hashowanie haseł**: Better Auth (bcrypt)
+- **Hashowanie haseł**: Better Auth (scrypt/bcrypt)
 - **Zarządzanie sesjami**: Sesje bazodanowe z konfigurowalnym wygaśnięciem
+- **Row-level security**: Każda procedura tRPC filtruje po `userId` z sesji — brak dostępu do cudzych danych
+- **Ochrona CSRF**: SameSite cookies + weryfikacja origin przez Better Auth
+- **Nagłówki bezpieczeństwa**: `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, `Strict-Transport-Security`
+- **Zapobieganie XSS**: React auto-escaping, brak `dangerouslySetInnerHTML`
+- **Zapobieganie SQL injection**: Drizzle ORM z parametryzacją zapytań
+- **Bezpieczne logowanie**: Pino z redakcją sekretów (`password`, `token`, `secret`, cookies)
+- **Zapobieganie session fixation**: Nowy token sesji przy logowaniu
+- **Zapobieganie privilege escalation**: Pole `role` z `input: false` — nie można go ustawić z klienta
+- **Rate limiting / brute-force**: gotowość do włączenia na poziomie infrastruktury
+- **Audyt zależności**: gotowość do `npm audit` / SCA w CI
 
 ## Strategia cache
 

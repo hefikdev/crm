@@ -38,4 +38,7 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+
+# local database (auto-migrated + seeded on startup)
+/data/
 next-env.d.ts

@@ -18,7 +18,9 @@ if (!fs.existsSync(dbDir)) {
 
 const sqlite = new Database(dbPath);
 
-sqlite.pragma("journal_mode = WAL");
+// ponytail: no WAL — its memory-mapped -shm/-wal files race with Turbopack's
+// file watcher and panic the dev server. Single-process demo DB, WAL not needed.
+sqlite.pragma("journal_mode = DELETE");
 sqlite.pragma("foreign_keys = ON");
 sqlite.pragma("busy_timeout = 5000");
 sqlite.pragma("synchronous = NORMAL");
