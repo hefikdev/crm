@@ -114,3 +114,67 @@ export function DashboardWidgets() {
     </div>
   );
 }
+
+export function LeadScoreWidget() {
+  const { data: leads, isLoading } = trpc.contacts.getLeadScores.useQuery();
+
+  if (isLoading) {
+    return <Skeleton className="h-64 bg-accent" />;
+  }
+
+  return (
+    <Card className="border-border bg-card">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+            Najlepsze leady
+          </CardTitle>
+          <Target className="h-4 w-4 text-emerald-400" />
+        </div>
+      </CardHeader>
+      <CardContent>
+        {!leads || leads.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-6">
+            Brak kontaktów
+          </p>
+        ) : (
+          <div className="space-y-2">
+            {leads.slice(0, 6).map((lead) => (
+              <Link
+                key={lead.id}
+                href={`/a/contacts/${lead.id}`}
+                className="flex items-center justify-between p-2 rounded-lg hover:bg-muted transition-colors cursor-pointer"
+              >
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">
+                    {lead.name}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {lead.email ?? "Brak e-maila"}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0 ml-2">
+                  <div className="w-16 h-1.5 rounded-full bg-accent overflow-hidden">
+                    <div
+                      className={`h-full rounded-full ${
+                        lead.score >= 70
+                          ? "bg-emerald-500"
+                          : lead.score >= 40
+                            ? "bg-amber-500"
+                            : "bg-zinc-500"
+                      }`}
+                      style={{ width: `${lead.score}%` }}
+                    />
+                  </div>
+                  <Badge className="bg-muted text-muted-foreground tabular-nums">
+                    {lead.score}
+                  </Badge>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}

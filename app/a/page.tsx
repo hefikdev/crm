@@ -8,7 +8,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { KanbanBoard } from "@/components/crm/kanban-board";
 import { DashboardCharts } from "@/components/crm/dashboard-charts";
-import { DashboardWidgets } from "@/components/crm/dashboard-widgets";
+import { DashboardWidgets, LeadScoreWidget } from "@/components/crm/dashboard-widgets";
 
 const stageColors: Record<string, string> = {
   lead: "bg-accent text-foreground/80",
@@ -97,6 +97,10 @@ export default function DashboardPage() {
       <DashboardCharts />
 
       <DashboardWidgets />
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <LeadScoreWidget />
+      </div>
 
       <div>
         <h2 className="text-lg font-semibold text-foreground mb-4">Tablica Kanban</h2>

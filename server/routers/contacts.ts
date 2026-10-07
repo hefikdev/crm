@@ -55,6 +55,40 @@ export const contactsRouter = router({
       };
     }),
 
+  // Lead scoring — deterministic 0-100 score from engagement signals.
+  getLeadScores: protectedProcedure.query(async ({ ctx }) => {
+    const rows = await db
+      .select()
+      .from(contacts)
+      .where(eq(contacts.userId, ctx.user.id));
+
+    const now = Date.now();
+    const scored = rows.map((c) => {
+      let score = 0;
+      if (c.status === "active") score += 30;
+      else if (c.status === "lead") score += 20;
+      if (c.email) score += 15;
+      if (c.phone) score += 15;
+      if (c.companyId) score += 10;
+      if (c.position) score += 5;
+      if (c.lastContactedAt) {
+        const days = (now - new Date(c.lastContactedAt).getTime()) / 86400000;
+        if (days <= 7) score += 25;
+        else if (days <= 30) score += 15;
+        else if (days <= 90) score += 5;
+      }
+      return {
+        id: c.id,
+        name: `${c.firstName} ${c.lastName}`,
+        email: c.email,
+        status: c.status,
+        score: Math.min(score, 100),
+      };
+    });
+
+    return scored.sort((a, b) => b.score - a.score).slice(0, 20);
+  }),
+
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {

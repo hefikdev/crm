@@ -10,6 +10,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { trpc } from "@/lib/trpc/client";
 import {
   LayoutDashboard,
   Users,
@@ -53,6 +54,12 @@ const quickActions = [
 export function CommandPalette() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+
+  const { data: results } = trpc.search.global.useQuery(
+    { query },
+    { enabled: query.trim().length >= 2 }
+  );
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -68,16 +75,81 @@ export function CommandPalette() {
   const runAction = useCallback(
     (href: string) => {
       setOpen(false);
+      setQuery("");
       router.push(href);
     },
     [router]
   );
 
+  const hasResults =
+    results &&
+    (results.contacts.length > 0 ||
+      results.companies.length > 0 ||
+      results.deals.length > 0);
+
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
-      <CommandInput placeholder="Szukaj stron, akcji..." />
+      <CommandInput
+        placeholder="Szukaj kontaktów, firm, ofert..."
+        value={query}
+        onValueChange={setQuery}
+      />
       <CommandList>
         <CommandEmpty>Brak wyników</CommandEmpty>
+
+        {hasResults && (
+          <>
+            {results.contacts.length > 0 && (
+              <CommandGroup heading="Kontakty">
+                {results.contacts.map((c) => (
+                  <CommandItem
+                    key={c.id}
+                    value={`${c.label} ${c.sub}`}
+                    onSelect={() => runAction(c.href)}
+                    className="cursor-pointer"
+                  >
+                    <Users className="h-4 w-4 mr-2" />
+                    <span>{c.label}</span>
+                    <span className="ml-2 text-xs text-muted-foreground">{c.sub}</span>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
+            {results.companies.length > 0 && (
+              <CommandGroup heading="Firmy">
+                {results.companies.map((c) => (
+                  <CommandItem
+                    key={c.id}
+                    value={`${c.label} ${c.sub}`}
+                    onSelect={() => runAction(c.href)}
+                    className="cursor-pointer"
+                  >
+                    <Building2 className="h-4 w-4 mr-2" />
+                    <span>{c.label}</span>
+                    <span className="ml-2 text-xs text-muted-foreground">{c.sub}</span>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
+            {results.deals.length > 0 && (
+              <CommandGroup heading="Oferty">
+                {results.deals.map((d) => (
+                  <CommandItem
+                    key={d.id}
+                    value={`${d.label} ${d.sub}`}
+                    onSelect={() => runAction(d.href)}
+                    className="cursor-pointer"
+                  >
+                    <DollarSign className="h-4 w-4 mr-2" />
+                    <span>{d.label}</span>
+                    <span className="ml-2 text-xs text-muted-foreground">{d.sub}</span>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
+          </>
+        )}
+
         <CommandGroup heading="Strony">
           {pages.map((page) => (
             <CommandItem
