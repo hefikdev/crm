@@ -36,7 +36,9 @@ const typeLabels: Record<string, string> = {
 export default function TimelinePage() {
   const { data, isLoading } = trpc.activities.list.useQuery({ limit: 100 });
 
-  const grouped = (data?.data ?? []).reduce<Record<string, typeof data.data>>(
+  const activities = data?.data ?? [];
+
+  const grouped = activities.reduce<Record<string, typeof activities>>(
     (acc, activity) => {
       const day = new Date(activity.createdAt).toLocaleDateString("pl-PL", {
         day: "numeric",
