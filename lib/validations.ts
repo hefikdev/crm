@@ -74,3 +74,26 @@ export const activitySchema = z.object({
   contactId: z.string().optional().or(z.literal("")),
   dealId: z.string().optional().or(z.literal("")),
 });
+
+export const productSchema = z.object({
+  name: z.string().min(1).max(200),
+  sku: z.string().max(100).optional().or(z.literal("")),
+  description: z.string().max(5000).optional().or(z.literal("")),
+  category: z.string().max(100).optional().or(z.literal("")),
+  price: z.number().min(0).default(0),
+  currency: z.string().max(3).default("PLN"),
+  active: z.boolean().default(true),
+});
+
+export const targetSchema = z.object({
+  period: z.string().regex(/^\d{4}-\d{2}$/, "Format: YYYY-MM"),
+  amount: z.number().min(0).default(0),
+  currency: z.string().max(3).default("PLN"),
+});
+
+export const dealItemSchema = z.object({
+  productId: z.string().optional().or(z.literal("")),
+  name: z.string().min(1).max(200),
+  quantity: z.number().int().min(1).default(1),
+  unitPrice: z.number().min(0).default(0),
+});

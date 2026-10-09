@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { KanbanBoard } from "@/components/crm/kanban-board";
 import { DashboardCharts } from "@/components/crm/dashboard-charts";
 import { DashboardWidgets, LeadScoreWidget } from "@/components/crm/dashboard-widgets";
+import { TargetProgressWidget } from "@/components/crm/target-progress-widget";
 
 const stageColors: Record<string, string> = {
   lead: "bg-accent text-foreground/80",
@@ -100,6 +101,7 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <LeadScoreWidget />
+        <TargetProgressWidget />
       </div>
 
       <div>

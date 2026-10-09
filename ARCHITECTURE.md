@@ -85,6 +85,9 @@ Profesjonalny system CRM zbudowany na Next.js 16, tRPC, Drizzle ORM i Better Aut
 - **Kontakty**: Główna encja CRM z relacją do firmy, śledzeniem statusu i źródłem
 - **Firmy**: Rekordy organizacji z klasyfikacją branżową i lokalizacją
 - **Oferty**: Pipeline sprzedaży z etapami, prawdopodobieństwem i wartościami
+- **Pozycje ofert**: Pozycje zamówienia powiązane z ofertą i katalogiem produktów
+- **Produkty**: Katalog produktów i usług z SKU, kategorią i ceną
+- **Cele sprzedażowe**: Miesięczne kwoty docelowe z porównaniem do faktycznej sprzedaży
 - **Aktywności**: Zarządzanie zadaniami z typologią i śledzeniem statusu
 
 ### Kluczowe decyzje

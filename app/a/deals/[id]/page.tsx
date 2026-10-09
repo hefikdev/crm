@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { Loader2, ArrowLeft, DollarSign, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { DealItems } from "@/components/crm/deal-items";
 
 const stageColors: Record<string, string> = {
   lead: "bg-accent text-foreground/80",
@@ -195,6 +196,8 @@ export default function DealDetailPage() {
           </form>
         </CardContent>
       </Card>
+
+      <DealItems dealId={id} />
     </div>
   );
 }

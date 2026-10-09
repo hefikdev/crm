@@ -5,6 +5,8 @@ import * as contactsSchema from "./schema/contacts";
 import * as companiesSchema from "./schema/companies";
 import * as dealsSchema from "./schema/deals";
 import * as activitiesSchema from "./schema/activities";
+import * as productsSchema from "./schema/products";
+import * as targetsSchema from "./schema/targets";
 import { logger } from "@/lib/logger";
 import path from "path";
 import fs from "fs";
@@ -33,6 +35,8 @@ const db = drizzle(sqlite, {
     ...companiesSchema,
     ...dealsSchema,
     ...activitiesSchema,
+    ...productsSchema,
+    ...targetsSchema,
   },
   logger:
     process.env.LOG_LEVEL === "debug"

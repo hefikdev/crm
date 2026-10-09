@@ -24,6 +24,8 @@ import {
   Flame,
   History,
   Info,
+  Package,
+  Target,
 } from "lucide-react";
 import { QuickCreateModal } from "@/components/crm/quick-create";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -37,6 +39,8 @@ const navItems = [
   { href: "/a/contacts", label: "Kontakty", icon: Users },
   { href: "/a/companies", label: "Firmy", icon: Building2 },
   { href: "/a/deals", label: "Oferty", icon: DollarSign },
+  { href: "/a/products", label: "Produkty", icon: Package },
+  { href: "/a/targets", label: "Cele", icon: Target },
   { href: "/a/forecast", label: "Prognoza", icon: TrendingUp },
   { href: "/a/tasks", label: "Zadania", icon: ClipboardCheck },
   { href: "/a/calendar", label: "Kalendarz", icon: Calendar },

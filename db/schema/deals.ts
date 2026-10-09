@@ -3,6 +3,7 @@ import { createId } from "@paralleldrive/cuid2";
 import { users } from "./auth";
 import { contacts } from "./contacts";
 import { companies } from "./companies";
+import { products } from "./products";
 
 export const deals = sqliteTable("deals", {
   id: text("id").primaryKey().$defaultFn(createId),
@@ -22,4 +23,14 @@ export const deals = sqliteTable("deals", {
   tags: text("tags", { mode: "json" }).$type<string[]>().default([]),
   createdAt: text("created_at").notNull().$defaultFn(() => new Date().toISOString()),
   updatedAt: text("updated_at").notNull().$defaultFn(() => new Date().toISOString()),
+});
+
+export const dealItems = sqliteTable("deal_items", {
+  id: text("id").primaryKey().$defaultFn(createId),
+  dealId: text("deal_id").notNull().references(() => deals.id, { onDelete: "cascade" }),
+  productId: text("product_id").references(() => products.id, { onDelete: "set null" }),
+  name: text("name").notNull(),
+  quantity: integer("quantity").default(1).notNull(),
+  unitPrice: real("unit_price").default(0).notNull(),
+  createdAt: text("created_at").notNull().$defaultFn(() => new Date().toISOString()),
 });

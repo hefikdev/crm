@@ -1,7 +1,7 @@
 import { router, protectedProcedure } from "@/server/trpc";
 import { db } from "@/db";
-import { deals } from "@/db/schema/deals";
-import { dealSchema } from "@/lib/validations";
+import { deals, dealItems } from "@/db/schema/deals";
+import { dealSchema, dealItemSchema } from "@/lib/validations";
 import { eq, desc, like, and, count, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -180,4 +180,91 @@ export const dealsRouter = router({
       lostCount: allDeals.filter((d) => d.stage === "closed_lost").length,
     };
   }),
+
+  // Line items — a deal's product breakdown.
+  listItems: protectedProcedure
+    .input(z.object({ dealId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const deal = await db
+        .select()
+        .from(deals)
+        .where(and(eq(deals.id, input.dealId), eq(deals.userId, ctx.user.id)))
+        .limit(1);
+
+      if (!deal[0]) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Deal not found" });
+      }
+
+      return await db
+        .select()
+        .from(dealItems)
+        .where(eq(dealItems.dealId, input.dealId))
+        .orderBy(desc(dealItems.createdAt));
+    }),
+
+  addItem: protectedProcedure
+    .input(z.object({ dealId: z.string(), data: dealItemSchema }))
+    .mutation(async ({ ctx, input }) => {
+      const deal = await db
+        .select()
+        .from(deals)
+        .where(and(eq(deals.id, input.dealId), eq(deals.userId, ctx.user.id)))
+        .limit(1);
+
+      if (!deal[0]) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Deal not found" });
+      }
+
+      const result = await db
+        .insert(dealItems)
+        .values({
+          dealId: input.dealId,
+          productId: input.data.productId || null,
+          name: input.data.name,
+          quantity: input.data.quantity,
+          unitPrice: input.data.unitPrice,
+        })
+        .returning();
+
+      // Keep the deal value in sync with its line items.
+      const items = await db
+        .select()
+        .from(dealItems)
+        .where(eq(dealItems.dealId, input.dealId));
+      const total = items.reduce((sum, i) => sum + i.quantity * i.unitPrice, 0);
+      await db
+        .update(deals)
+        .set({ value: total, updatedAt: new Date().toISOString() })
+        .where(eq(deals.id, input.dealId));
+
+      return result[0];
+    }),
+
+  removeItem: protectedProcedure
+    .input(z.object({ id: z.string(), dealId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const deal = await db
+        .select()
+        .from(deals)
+        .where(and(eq(deals.id, input.dealId), eq(deals.userId, ctx.user.id)))
+        .limit(1);
+
+      if (!deal[0]) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Deal not found" });
+      }
+
+      await db.delete(dealItems).where(eq(dealItems.id, input.id));
+
+      const items = await db
+        .select()
+        .from(dealItems)
+        .where(eq(dealItems.dealId, input.dealId));
+      const total = items.reduce((sum, i) => sum + i.quantity * i.unitPrice, 0);
+      await db
+        .update(deals)
+        .set({ value: total, updatedAt: new Date().toISOString() })
+        .where(eq(deals.id, input.dealId));
+
+      return { success: true };
+    }),
 });

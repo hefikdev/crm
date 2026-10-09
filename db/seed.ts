@@ -2,11 +2,13 @@ import { db, sqlite } from "@/db";
 import { users, accounts } from "@/db/schema/auth";
 import { companies } from "@/db/schema/companies";
 import { contacts } from "@/db/schema/contacts";
-import { deals } from "@/db/schema/deals";
+import { deals, dealItems } from "@/db/schema/deals";
 import { activities } from "@/db/schema/activities";
+import { products } from "@/db/schema/products";
+import { targets } from "@/db/schema/targets";
 import { hashPassword } from "better-auth/crypto";
 import { createId } from "@paralleldrive/cuid2";
-import { count } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
 
 // Deterministic PRNG so demo data is stable across runs.
 let rngState = 1337;
@@ -28,6 +30,12 @@ const STAGES = ["lead", "qualified", "proposal", "negotiation", "closed_won", "c
 const ACTIVITY_TYPES = ["call", "email", "meeting", "task", "note", "follow_up"] as const;
 const COMPANY_SUFFIX = ["Sp. z o.o.", "S.A.", "Group", "Solutions", "Systems", "Partners", "Tech", "Industries"];
 const COMPANY_PREFIX = ["Nova", "Vertex", "Apex", "Prime", "Global", "Delta", "Omega", "Sigma", "Alpha", "Quantum", "Stellar", "Pioneer", "Summit", "Horizon", "Fusion"];
+const PRODUCT_CATEGORIES = ["Oprogramowanie", "Usługi", "Sprzęt", "Szkolenia", "Wsparcie", "Subskrypcje"];
+const PRODUCT_NAMES = [
+  "CRM Enterprise", "CRM Standard", "Moduł Analityczny", "Integracja API", "Wdrożenie i konfiguracja",
+  "Szkolenie zespołu", "Wsparcie Premium", "Hosting roczny", "Migracja danych", "Audyt procesów",
+  "Licencja dodatkowa", "Konsultacje strategiczne", "Serwis 24/7", "Backup w chmurze", "Portal klienta",
+];
 
 const daysAgo = (n: number) => new Date(Date.now() - n * 86400000).toISOString();
 const daysAhead = (n: number) => new Date(Date.now() + n * 86400000).toISOString();
@@ -134,6 +142,8 @@ export async function seedForUser(userId: string) {
   });
   await db.insert(activities).values(activityRows);
 
+  await seedCatalogForUser(userId);
+
   return {
     companies: companyRows.length,
     contacts: contactRows.length,
@@ -142,9 +152,94 @@ export async function seedForUser(userId: string) {
   };
 }
 
+// Idempotent: seeds products, targets and deal line items for a user.
+// Safe to call on existing databases to backfill the catalog.
+export async function seedCatalogForUser(userId: string) {
+  const existing = await db
+    .select({ c: count() })
+    .from(products)
+    .where(eq(products.userId, userId));
+  if ((existing[0]?.c ?? 0) > 0) {
+    return { skipped: true as const };
+  }
+
+  // 30 products
+  const productRows = Array.from({ length: 30 }, (_, i) => {
+    const name = PRODUCT_NAMES[i % PRODUCT_NAMES.length];
+    return {
+      id: createId(),
+      userId,
+      name: i >= PRODUCT_NAMES.length ? `${name} ${Math.floor(i / PRODUCT_NAMES.length) + 1}` : name,
+      sku: `SKU-${String(i + 1).padStart(4, "0")}`,
+      description: `${name} — oferta handlowa dla klientów biznesowych.`,
+      category: pick(PRODUCT_CATEGORIES),
+      price: int(5, 500) * 100,
+      currency: "PLN",
+      active: rand() > 0.15,
+      createdAt: daysAgo(int(1, 300)),
+      updatedAt: daysAgo(int(0, 30)),
+    };
+  });
+  await db.insert(products).values(productRows);
+
+  // 6 monthly targets (current + 5 previous months)
+  const now = new Date();
+  const targetRows = Array.from({ length: 6 }, (_, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const period = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    return {
+      id: createId(),
+      userId,
+      period,
+      amount: int(200, 800) * 1000,
+      currency: "PLN",
+      createdAt: daysAgo(i * 30 + 1),
+      updatedAt: daysAgo(i * 30),
+    };
+  });
+  await db.insert(targets).values(targetRows);
+
+  // Deal line items for a subset of the user's deals
+  const userDeals = await db
+    .select({ id: deals.id, createdAt: deals.createdAt })
+    .from(deals)
+    .where(eq(deals.userId, userId))
+    .limit(120);
+
+  if (userDeals.length > 0) {
+    const itemRows = userDeals.flatMap((deal) => {
+      const lineCount = int(1, 3);
+      return Array.from({ length: lineCount }, () => {
+        const product = pick(productRows);
+        return {
+          id: createId(),
+          dealId: deal.id,
+          productId: product.id,
+          name: product.name,
+          quantity: int(1, 5),
+          unitPrice: product.price,
+          createdAt: deal.createdAt,
+        };
+      });
+    });
+    await db.insert(dealItems).values(itemRows);
+  }
+
+  return {
+    skipped: false as const,
+    products: productRows.length,
+    targets: targetRows.length,
+  };
+}
+
 export async function seed() {
   const existing = await db.select({ c: count() }).from(companies);
   if ((existing[0]?.c ?? 0) > 0) {
+    // Backfill catalog data for users created before products/targets existed.
+    const allUsers = await db.select({ id: users.id }).from(users);
+    for (const u of allUsers) {
+      await seedCatalogForUser(u.id);
+    }
     return { seeded: false as const };
   }
 

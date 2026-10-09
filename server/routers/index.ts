@@ -5,6 +5,8 @@ import { dealsRouter } from "./deals";
 import { activitiesRouter } from "./activities";
 import { dashboardRouter } from "./dashboard";
 import { searchRouter } from "./search";
+import { productsRouter } from "./products";
+import { targetsRouter } from "./targets";
 
 export const appRouter = router({
   contacts: contactsRouter,
@@ -13,6 +15,8 @@ export const appRouter = router({
   activities: activitiesRouter,
   dashboard: dashboardRouter,
   search: searchRouter,
+  products: productsRouter,
+  targets: targetsRouter,
 });
 
 export type AppRouter = typeof appRouter;
