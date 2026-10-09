@@ -28,9 +28,10 @@ import {
   FolderOpen,
   Flame,
   History,
-  Info,
   Package,
   Target,
+  Headphones,
+  Zap,
 } from "lucide-react";
 
 const pages = [
@@ -41,6 +42,7 @@ const pages = [
   { href: "/a/deals", label: "Oferty", icon: DollarSign, keywords: "deals oferty sprzedaz" },
   { href: "/a/products", label: "Produkty", icon: Package, keywords: "products produkty katalog cennik" },
   { href: "/a/targets", label: "Cele", icon: Target, keywords: "targets cele kwoty sprzedaz" },
+  { href: "/a/automations", label: "Automatyzacje", icon: Zap, keywords: "automations automatyzacje reguly workflow" },
   { href: "/a/forecast", label: "Prognoza", icon: TrendingUp, keywords: "forecast prognoza sprzedaz" },
   { href: "/a/tasks", label: "Zadania", icon: ClipboardCheck, keywords: "tasks zadania" },
   { href: "/a/calendar", label: "Kalendarz", icon: Calendar, keywords: "calendar kalendarz" },
@@ -50,7 +52,7 @@ const pages = [
   { href: "/a/files", label: "Pliki", icon: FolderOpen, keywords: "files pliki dokumenty" },
   { href: "/a/reports", label: "Raporty", icon: BarChart3, keywords: "reports raporty statystyki" },
   { href: "/a/activities", label: "Aktywności", icon: CalendarClock, keywords: "activities aktywnosci" },
-  { href: "/a/about", label: "O systemie", icon: Info, keywords: "about o systemie info roadmap" },
+  { href: "/a/support", label: "Wsparcie", icon: Headphones, keywords: "support wsparcie pomoc tickets zgloszenia" },
   { href: "/a/settings", label: "Ustawienia", icon: Settings, keywords: "settings ustawienia konto" },
 ];
 
@@ -95,12 +97,14 @@ export function CommandPalette() {
     results &&
     (results.contacts.length > 0 ||
       results.companies.length > 0 ||
-      results.deals.length > 0);
+      results.deals.length > 0 ||
+      results.products.length > 0 ||
+      results.activities.length > 0);
 
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
       <CommandInput
-        placeholder="Szukaj kontaktów, firm, ofert..."
+        placeholder="Szukaj kontaktów, firm, ofert, produktów..."
         value={query}
         onValueChange={setQuery}
       />
@@ -153,6 +157,37 @@ export function CommandPalette() {
                     <DollarSign className="h-4 w-4 mr-2" />
                     <span>{d.label}</span>
                     <span className="ml-2 text-xs text-muted-foreground">{d.sub}</span>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
+            {results.products.length > 0 && (
+              <CommandGroup heading="Produkty">
+                {results.products.map((p) => (
+                  <CommandItem
+                    key={p.id}
+                    value={`${p.label} ${p.sub}`}
+                    onSelect={() => runAction(p.href)}
+                    className="cursor-pointer"
+                  >
+                    <Package className="h-4 w-4 mr-2" />
+                    <span>{p.label}</span>
+                    <span className="ml-2 text-xs text-muted-foreground">{p.sub}</span>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
+            {results.activities.length > 0 && (
+              <CommandGroup heading="Aktywności">
+                {results.activities.map((a) => (
+                  <CommandItem
+                    key={a.id}
+                    value={`${a.label} ${a.sub}`}
+                    onSelect={() => runAction(a.href)}
+                    className="cursor-pointer"
+                  >
+                    <CalendarClock className="h-4 w-4 mr-2" />
+                    <span>{a.label}</span>
                   </CommandItem>
                 ))}
               </CommandGroup>

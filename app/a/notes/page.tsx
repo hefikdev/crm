@@ -16,7 +16,11 @@ import {
   Trash2,
   Loader2,
   Save,
+  CalendarClock,
+  Users,
+  Mail,
 } from "lucide-react";
+import { QuickLinks } from "@/components/crm/quick-links";
 import {
   Select,
   SelectContent,
@@ -109,7 +113,7 @@ export default function NotesPage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Notatki</h1>
@@ -236,6 +240,14 @@ export default function NotesPage() {
           ))}
         </div>
       )}
+
+      <QuickLinks
+        links={[
+          { href: "/a/activities", label: "Aktywności", icon: CalendarClock },
+          { href: "/a/contacts", label: "Kontakty", icon: Users },
+          { href: "/a/inbox", label: "Wiadomości", icon: Mail },
+        ]}
+      />
     </div>
   );
 }

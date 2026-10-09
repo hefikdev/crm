@@ -6,6 +6,7 @@ import { deals, dealItems } from "@/db/schema/deals";
 import { activities } from "@/db/schema/activities";
 import { products } from "@/db/schema/products";
 import { targets } from "@/db/schema/targets";
+import { automations, emailTemplates } from "@/db/schema/automations";
 import { hashPassword } from "better-auth/crypto";
 import { createId } from "@paralleldrive/cuid2";
 import { count, eq } from "drizzle-orm";
@@ -41,8 +42,8 @@ const daysAgo = (n: number) => new Date(Date.now() - n * 86400000).toISOString()
 const daysAhead = (n: number) => new Date(Date.now() + n * 86400000).toISOString();
 
 export async function seedForUser(userId: string) {
-  // 60 companies
-  const companyRows = Array.from({ length: 60 }, () => {
+  // 120 companies
+  const companyRows = Array.from({ length: 120 }, () => {
     const name = `${pick(COMPANY_PREFIX)} ${pick(COMPANY_SUFFIX)}`;
     const domain = name.toLowerCase().replace(/[^a-z]/g, "") + ".pl";
     return {
@@ -58,7 +59,13 @@ export async function seedForUser(userId: string) {
       address: `ul. ${pick(LAST)} ${int(1, 100)}`,
       city: pick(CITIES),
       country: "Polska",
-      notes: null,
+      notes: pick([
+        "Klient strategiczny — priorytet obsługi.",
+        "Zainteresowany rozszerzeniem licencji.",
+        "Wymaga faktury z odroczonym terminem.",
+        "Polecony przez partnera handlowego.",
+        null,
+      ]),
       tags: [pick(INDUSTRIES)],
       status: pick(["active", "active", "active", "lead", "inactive"] as const),
       createdAt: daysAgo(int(1, 365)),
@@ -67,8 +74,8 @@ export async function seedForUser(userId: string) {
   });
   await db.insert(companies).values(companyRows);
 
-  // 400 contacts
-  const contactRows = Array.from({ length: 400 }, () => {
+  // 800 contacts
+  const contactRows = Array.from({ length: 800 }, () => {
     const first = pick(FIRST);
     const last = pick(LAST);
     const company = pick(companyRows);
@@ -84,7 +91,12 @@ export async function seedForUser(userId: string) {
       position: pick(POSITIONS),
       avatarUrl: null,
       tags: [],
-      notes: null,
+      notes: pick([
+        "Preferuje kontakt telefoniczny.",
+        "Decydent w zakresie zakupów IT.",
+        "Prosi o ofertę mailem.",
+        null,
+      ]),
       status: pick(["active", "active", "active", "lead", "inactive", "archived"] as const),
       source: pick(SOURCES),
       lastContactedAt: daysAgo(int(0, 90)),
@@ -94,8 +106,8 @@ export async function seedForUser(userId: string) {
   });
   await db.insert(contacts).values(contactRows);
 
-  // 300 deals
-  const dealRows = Array.from({ length: 300 }, () => {
+  // 600 deals
+  const dealRows = Array.from({ length: 600 }, () => {
     const contact = pick(contactRows);
     const company = companyRows.find((c) => c.id === contact.companyId) ?? pick(companyRows);
     const stage = pick(STAGES);
@@ -112,7 +124,12 @@ export async function seedForUser(userId: string) {
       probability: stage === "closed_won" ? 100 : stage === "closed_lost" ? 0 : int(10, 90),
       expectedCloseDate: daysAhead(int(1, 120)),
       closedAt: closed ? daysAgo(int(1, 180)) : null,
-      notes: null,
+      notes: pick([
+        "Klient oczekuje wdrożenia w tym kwartale.",
+        "Negocjacje dotyczą warunków płatności.",
+        "Wymagana integracja z systemem ERP.",
+        null,
+      ]),
       tags: [],
       createdAt: daysAgo(int(1, 300)),
       updatedAt: daysAgo(int(0, 30)),
@@ -120,8 +137,8 @@ export async function seedForUser(userId: string) {
   });
   await db.insert(deals).values(dealRows);
 
-  // 400 activities
-  const activityRows = Array.from({ length: 400 }, () => {
+  // 900 activities
+  const activityRows = Array.from({ length: 900 }, () => {
     const contact = pick(contactRows);
     const deal = pick(dealRows);
     const status = pick(["pending", "pending", "completed", "completed", "cancelled"] as const);
@@ -132,7 +149,13 @@ export async function seedForUser(userId: string) {
       dealId: deal.id,
       type: pick(ACTIVITY_TYPES),
       title: `${pick(["Rozmowa", "Spotkanie", "E-mail", "Follow-up", "Zadanie", "Notatka"])} - ${contact.firstName} ${contact.lastName}`,
-      description: null,
+      description: pick([
+        "Omówiono zakres współpracy i harmonogram.",
+        "Klient prosi o przesłanie oferty.",
+        "Ustalono termin kolejnego spotkania.",
+        "Wysłano materiały informacyjne.",
+        null,
+      ]),
       status,
       dueDate: daysAhead(int(-30, 60)),
       completedAt: status === "completed" ? daysAgo(int(0, 60)) : null,
@@ -143,6 +166,7 @@ export async function seedForUser(userId: string) {
   await db.insert(activities).values(activityRows);
 
   await seedCatalogForUser(userId);
+  await seedAutomationsForUser(userId);
 
   return {
     companies: companyRows.length,
@@ -163,8 +187,8 @@ export async function seedCatalogForUser(userId: string) {
     return { skipped: true as const };
   }
 
-  // 30 products
-  const productRows = Array.from({ length: 30 }, (_, i) => {
+  // 60 products
+  const productRows = Array.from({ length: 60 }, (_, i) => {
     const name = PRODUCT_NAMES[i % PRODUCT_NAMES.length];
     return {
       id: createId(),
@@ -204,7 +228,7 @@ export async function seedCatalogForUser(userId: string) {
     .select({ id: deals.id, createdAt: deals.createdAt })
     .from(deals)
     .where(eq(deals.userId, userId))
-    .limit(120);
+    .limit(300);
 
   if (userDeals.length > 0) {
     const itemRows = userDeals.flatMap((deal) => {
@@ -225,6 +249,8 @@ export async function seedCatalogForUser(userId: string) {
     await db.insert(dealItems).values(itemRows);
   }
 
+  await seedAutomationsForUser(userId);
+
   return {
     skipped: false as const,
     products: productRows.length,
@@ -232,13 +258,94 @@ export async function seedCatalogForUser(userId: string) {
   };
 }
 
+// Idempotent: seeds example automations and email templates.
+export async function seedAutomationsForUser(userId: string) {
+  const existing = await db
+    .select({ c: count() })
+    .from(automations)
+    .where(eq(automations.userId, userId));
+  if ((existing[0]?.c ?? 0) > 0) {
+    return { skipped: true as const };
+  }
+
+  await db.insert(automations).values([
+    {
+      id: createId(),
+      userId,
+      name: "Zadanie po wygraniu oferty",
+      trigger: "deal_won",
+      action: "create_task",
+      actionValue: "Zadzwoń do klienta i podziękuj za współpracę — {{name}}",
+      delayMinutes: 0,
+      active: true,
+      runCount: 0,
+    },
+    {
+      id: createId(),
+      userId,
+      name: "Follow-up dzień po utworzeniu oferty",
+      trigger: "deal_created",
+      action: "create_task",
+      actionValue: "Follow-up: skontaktuj się w sprawie {{name}}",
+      delayMinutes: 1440,
+      active: true,
+      runCount: 0,
+    },
+    {
+      id: createId(),
+      userId,
+      name: "Powitanie nowego kontaktu",
+      trigger: "contact_created",
+      action: "send_email",
+      actionSubject: "Dziękujemy za kontakt",
+      actionValue:
+        "Dzień dobry,\ndziękujemy za nawiązanie kontaktu. Wkrótce się odezwiemy.\n\nPozdrawiamy,\nZespół",
+      delayMinutes: 0,
+      active: true,
+      runCount: 0,
+    },
+    {
+      id: createId(),
+      userId,
+      name: "Notatka przy przejściu do negocjacji",
+      trigger: "deal_stage_changed",
+      triggerValue: "negotiation",
+      action: "create_note",
+      actionValue: "Oferta {{name}} weszła w etap negocjacji",
+      delayMinutes: 0,
+      active: true,
+      runCount: 0,
+    },
+  ]);
+
+  await db.insert(emailTemplates).values([
+    {
+      id: createId(),
+      userId,
+      name: "Podziękowanie za spotkanie",
+      subject: "Dziękujemy za spotkanie",
+      body: "Dzień dobry,\ndziękujemy za dzisiejsze spotkanie. Podsumowanie i kolejne kroki prześlemy w osobnej wiadomości.\n\nPozdrawiamy",
+    },
+    {
+      id: createId(),
+      userId,
+      name: "Przypomnienie o ofercie",
+      subject: "Przypomnienie w sprawie oferty",
+      body: "Dzień dobry,\nchciałbym przypomnieć o przesłanej ofercie. Chętnie odpowiem na pytania.\n\nPozdrawiam",
+    },
+  ]);
+
+  return { skipped: false as const };
+}
+
 export async function seed() {
   const existing = await db.select({ c: count() }).from(companies);
   if ((existing[0]?.c ?? 0) > 0) {
-    // Backfill catalog data for users created before products/targets existed.
+    // Backfill catalog + automation data for users created before these existed.
     const allUsers = await db.select({ id: users.id }).from(users);
     for (const u of allUsers) {
       await seedCatalogForUser(u.id);
+      await seedAutomationsForUser(u.id);
     }
     return { seeded: false as const };
   }

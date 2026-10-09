@@ -3,196 +3,277 @@
 import { trpc } from "@/lib/trpc/client";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { Loader2, ArrowLeft, Building2, Globe, Trash2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Building2,
+  Globe,
+  Trash2,
+  Pencil,
+  Mail,
+  Phone,
+  MapPin,
+  Users,
+  User,
+  DollarSign,
+  CalendarClock,
+} from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { QuickLinks } from "@/components/crm/quick-links";
+
+const statusLabels: Record<string, string> = {
+  active: "Aktywna",
+  inactive: "Nieaktywna",
+  lead: "Lead",
+  archived: "Zarchiwizowana",
+};
 
 export default function CompanyDetailPage() {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
 
-  const { data: company, isLoading, refetch } = trpc.companies.getById.useQuery({ id });
-  const updateCompany = trpc.companies.update.useMutation({
-    onSuccess: () => { toast.success("Firma zaktualizowana"); refetch(); },
-    onError: (err) => toast.error(err.message),
-  });
+  const { data: company, isLoading } = trpc.companies.getById.useQuery({ id });
+  const { data: contacts } = trpc.contacts.list.useQuery({ companyId: id, limit: 50 });
+
   const deleteCompany = trpc.companies.delete.useMutation({
-    onSuccess: () => { toast.success("Firma usunięta"); router.push("/a/companies"); },
+    onSuccess: () => {
+      toast.success("Firma usunięta");
+      router.push("/a/companies");
+    },
     onError: (err) => toast.error(err.message),
   });
 
-  const [form, setForm] = useState<{
-    name: string;
-    domain: string;
-    industry: string;
-    size: "1-10" | "11-50" | "51-200" | "201-1000" | "1001+" | undefined;
-    phone: string;
-    email: string;
-    website: string;
-    address: string;
-    city: string;
-    country: string;
-    notes: string;
-    tags: string[];
-    status: "active" | "inactive" | "lead" | "archived";
-  }>({
-    name: "",
-    domain: "",
-    industry: "",
-    size: undefined,
-    phone: "",
-    email: "",
-    website: "",
-    address: "",
-    city: "",
-    country: "",
-    notes: "",
-    tags: [],
-    status: "active",
-  });
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-8 w-32 bg-accent" />
+        <Skeleton className="h-64 bg-accent" />
+        <Skeleton className="h-48 bg-accent" />
+      </div>
+    );
+  }
 
-  useEffect(() => {
-    if (company) {
-      setForm({
-        name: company.name,
-        domain: company.domain ?? "",
-        industry: company.industry ?? "",
-        size: company.size ?? undefined,
-        phone: company.phone ?? "",
-        email: company.email ?? "",
-        website: company.website ?? "",
-        address: company.address ?? "",
-        city: company.city ?? "",
-        country: company.country ?? "",
-        notes: company.notes ?? "",
-        tags: company.tags ?? [],
-        status: company.status,
-      });
-    }
-  }, [company]);
-
-  if (isLoading) return <div className="p-6"><Skeleton className="h-96 bg-accent" /></div>;
-  if (!company) return <div className="p-6 text-center"><p className="text-muted-foreground">Firma nie znaleziona</p></div>;
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    updateCompany.mutate({ id, data: form });
-  };
+  if (!company) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-muted-foreground">Firma nie znaleziona</p>
+        <Link href="/a/companies" className="text-foreground hover:underline">
+          Powrót do firm
+        </Link>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-6 space-y-6 max-w-2xl mx-auto min-h-[calc(100vh-8rem)] flex flex-col justify-center">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <Link href="/a/companies" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground cursor-pointer">
           <ArrowLeft className="h-4 w-4" /> Powrót
         </Link>
-        <Button variant="destructive" size="sm" onClick={() => { if (confirm("Usunąć firmę?")) deleteCompany.mutate({ id }); }} className="cursor-pointer">
-          <Trash2 className="h-4 w-4 mr-2" /> Usuń
-        </Button>
-      </div>
-
-      <div className="flex items-center gap-4">
-        <div className="h-16 w-16 rounded-xl bg-accent flex items-center justify-center"><Building2 className="h-6 w-6 text-foreground/80" /></div>
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">{company.name}</h1>
-          <p className="text-sm text-muted-foreground">{company.industry ?? "Brak branży"} · {company.city ?? "Brak lokalizacji"}</p>
+        <div className="flex items-center gap-2">
+          <Link href={`/a/companies/${id}/edit`}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-border text-muted-foreground hover:text-foreground cursor-pointer"
+            >
+              <Pencil className="h-4 w-4 mr-2" />
+              Edytuj
+            </Button>
+          </Link>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => {
+              if (confirm("Usunąć firmę?")) deleteCompany.mutate({ id });
+            }}
+            className="cursor-pointer"
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Usuń
+          </Button>
         </div>
-        <Badge className={company.status === "active" ? "bg-emerald-500/15 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-200" : "bg-accent text-foreground/80"}>{company.status}</Badge>
       </div>
 
       <Card className="border-border bg-card">
-        <CardHeader><CardTitle className="text-foreground">Edytuj firmę</CardTitle></CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label className="text-foreground/80">Nazwa firmy</Label>
-              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required className="bg-background text-foreground" />
+        <CardContent className="pt-6">
+          <div className="flex items-start gap-4">
+            <div className="h-16 w-16 rounded-xl bg-accent flex items-center justify-center shrink-0">
+              <Building2 className="h-6 w-6 text-foreground/80" />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-foreground/80">Domena</Label>
-                <Input value={form.domain} onChange={(e) => setForm({ ...form, domain: e.target.value })} className="bg-background text-foreground" />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-3 flex-wrap">
+                <h1 className="text-2xl font-bold text-foreground">{company.name}</h1>
+                <Badge
+                  className={
+                    company.status === "active"
+                      ? "bg-emerald-500/15 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-200"
+                      : "bg-accent text-foreground/80"
+                  }
+                >
+                  {statusLabels[company.status]}
+                </Badge>
               </div>
-              <div className="space-y-2">
-                <Label className="text-foreground/80">Branża</Label>
-                <Input value={form.industry} onChange={(e) => setForm({ ...form, industry: e.target.value })} className="bg-background text-foreground" />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-foreground/80">Wielkość</Label>
-                <Select value={form.size ?? ""} onValueChange={(v) => setForm({ ...form, size: (v ?? undefined) as typeof form.size })}>
-                  <SelectTrigger className="bg-background text-foreground"><SelectValue placeholder="Wybierz wielkość" /></SelectTrigger>
-                  <SelectContent className="bg-popover border-border text-popover-foreground">
-                    <SelectItem value="1-10">1-10</SelectItem>
-                    <SelectItem value="11-50">11-50</SelectItem>
-                    <SelectItem value="51-200">51-200</SelectItem>
-                    <SelectItem value="201-1000">201-1000</SelectItem>
-                    <SelectItem value="1001+">1001+</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-foreground/80">Status</Label>
-                <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: (v ?? "active") as typeof form.status })}>
-                  <SelectTrigger className="bg-background text-foreground"><SelectValue /></SelectTrigger>
-                  <SelectContent className="bg-popover border-border text-popover-foreground">
-                    <SelectItem value="active">Aktywna</SelectItem>
-                    <SelectItem value="inactive">Nieaktywna</SelectItem>
-                    <SelectItem value="lead">Lead</SelectItem>
-                    <SelectItem value="archived">Zarchiwizowana</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-foreground/80">Email</Label>
-                <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="bg-background text-foreground" />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-foreground/80">Telefon</Label>
-                <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="bg-background text-foreground" />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-foreground/80">Miasto</Label>
-                <Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="bg-background text-foreground" />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-foreground/80">Kraj</Label>
-                <Input value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} className="bg-background text-foreground" />
+              <p className="text-sm text-muted-foreground mt-1">
+                {company.industry ?? "Brak branży"}
+                {company.size ? ` · ${company.size} pracowników` : ""}
+                {company.city ? ` · ${company.city}` : ""}
+              </p>
+              <div className="flex flex-wrap items-center gap-4 mt-3 text-sm">
+                {company.email && (
+                  <a
+                    href={`mailto:${company.email}`}
+                    className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground cursor-pointer"
+                  >
+                    <Mail className="h-3.5 w-3.5" />
+                    {company.email}
+                  </a>
+                )}
+                {company.phone && (
+                  <a
+                    href={`tel:${company.phone}`}
+                    className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground cursor-pointer"
+                  >
+                    <Phone className="h-3.5 w-3.5" />
+                    {company.phone}
+                  </a>
+                )}
+                {company.website && (
+                  <a
+                    href={company.website}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground cursor-pointer"
+                  >
+                    <Globe className="h-3.5 w-3.5" />
+                    {company.website.replace(/^https?:\/\//, "")}
+                  </a>
+                )}
               </div>
             </div>
-            <div className="space-y-2">
-              <Label className="text-foreground/80">Adres</Label>
-              <Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} className="bg-background text-foreground" />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-foreground/80">Notatki</Label>
-              <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} className="bg-background text-foreground min-h-[100px]" />
-            </div>
-            <Button type="submit" className="bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer" disabled={updateCompany.isPending}>
-              {updateCompany.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null} Zapisz zmiany
-            </Button>
-          </form>
+          </div>
         </CardContent>
       </Card>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="border-border bg-card">
+          <CardHeader>
+            <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+              Informacje
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <InfoRow icon={Globe} label="Domena">
+              {company.domain || <span className="text-muted-foreground">Brak</span>}
+            </InfoRow>
+            <InfoRow icon={Building2} label="Branża">
+              {company.industry || <span className="text-muted-foreground">Brak</span>}
+            </InfoRow>
+            <InfoRow icon={MapPin} label="Adres">
+              {[company.address, company.city, company.country].filter(Boolean).join(", ") || (
+                <span className="text-muted-foreground">Brak</span>
+              )}
+            </InfoRow>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border bg-card">
+          <CardHeader>
+            <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+              Notatki
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {company.notes ? (
+              <p className="text-sm text-foreground whitespace-pre-wrap">{company.notes}</p>
+            ) : (
+              <p className="text-sm text-muted-foreground">Brak notatek</p>
+            )}
+            {company.tags && company.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-4">
+                {company.tags.map((tag) => (
+                  <Badge key={tag} className="bg-accent text-foreground/80">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="border-border bg-card">
+        <CardHeader>
+          <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+            Kontakty ({contacts?.total ?? 0})
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {!contacts || contacts.data.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-6">
+              Brak kontaktów w tej firmie
+            </p>
+          ) : (
+            <div className="divide-y divide-border">
+              {contacts.data.map((contact) => (
+                <Link
+                  key={contact.id}
+                  href={`/a/contacts/${contact.id}`}
+                  className="flex items-center justify-between py-3 hover:bg-muted transition-colors cursor-pointer px-2 -mx-2 rounded-lg"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="h-9 w-9 rounded-full bg-accent flex items-center justify-center text-xs font-medium text-foreground/80 shrink-0">
+                      {contact.firstName[0]}
+                      {contact.lastName[0]}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm text-foreground truncate">
+                        {contact.firstName} {contact.lastName}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {contact.position ?? contact.email ?? "—"}
+                      </p>
+                    </div>
+                  </div>
+                  <User className="h-4 w-4 text-muted-foreground shrink-0" />
+                </Link>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <QuickLinks
+        links={[
+          { href: "/a/contacts", label: "Kontakty", icon: Users },
+          { href: "/a/deals", label: "Oferty", icon: DollarSign },
+          { href: "/a/activities", label: "Aktywności", icon: CalendarClock },
+        ]}
+      />
+    </div>
+  );
+}
+
+function InfoRow({
+  icon: Icon,
+  label,
+  children,
+}: {
+  icon: typeof Globe;
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-4">
+      <span className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Icon className="h-3.5 w-3.5" />
+        {label}
+      </span>
+      <span className="text-sm text-foreground text-right">{children}</span>
     </div>
   );
 }

@@ -13,7 +13,10 @@ import {
   ArrowRight,
   CheckCircle2,
   Clock,
+  Calendar,
+  ClipboardCheck,
 } from "lucide-react";
+import { QuickLinks } from "@/components/crm/quick-links";
 
 const typeIcons: Record<string, React.ReactNode> = {
   call: <Phone className="h-3.5 w-3.5" />,
@@ -52,7 +55,7 @@ export default function TimelinePage() {
   );
 
   return (
-    <div className="p-6 space-y-6 max-w-3xl">
+    <div className="p-6 space-y-6 max-w-3xl mx-auto">
       <div>
         <h1 className="text-2xl font-bold text-foreground">Os czasu</h1>
         <p className="text-muted-foreground text-sm mt-1">
@@ -110,6 +113,14 @@ export default function TimelinePage() {
           </div>
         ))
       )}
+
+      <QuickLinks
+        links={[
+          { href: "/a/activities", label: "Aktywności", icon: CalendarClock },
+          { href: "/a/tasks", label: "Zadania", icon: ClipboardCheck },
+          { href: "/a/calendar", label: "Kalendarz", icon: Calendar },
+        ]}
+      />
     </div>
   );
 }

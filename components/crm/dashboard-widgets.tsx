@@ -138,8 +138,8 @@ export function LeadScoreWidget() {
             Brak kontaktów
           </p>
         ) : (
-          <div className="space-y-2">
-            {leads.slice(0, 6).map((lead) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
+            {leads.slice(0, 12).map((lead) => (
               <Link
                 key={lead.id}
                 href={`/a/contacts/${lead.id}`}

@@ -56,6 +56,22 @@ export const activitiesRouter = router({
       };
     }),
 
+  getById: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const activity = await db
+        .select()
+        .from(activities)
+        .where(and(eq(activities.id, input.id), eq(activities.userId, ctx.user.id)))
+        .limit(1);
+
+      if (!activity[0]) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Activity not found" });
+      }
+
+      return activity[0];
+    }),
+
   create: protectedProcedure
     .input(activitySchema)
     .mutation(async ({ ctx, input }) => {

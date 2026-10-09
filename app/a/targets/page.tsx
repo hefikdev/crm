@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { Target, TrendingUp, Loader2, Trash2 } from "lucide-react";
+import { Target, TrendingUp, Loader2, Trash2, DollarSign, BarChart3 } from "lucide-react";
+import { QuickLinks } from "@/components/crm/quick-links";
 
 export default function TargetsPage() {
   const { data: progress, isLoading, refetch } = trpc.targets.getProgress.useQuery();
@@ -41,7 +42,7 @@ export default function TargetsPage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-foreground">Cele sprzedażowe</h1>
         <p className="text-muted-foreground text-sm mt-1">
@@ -188,6 +189,14 @@ export default function TargetsPage() {
           )}
         </CardContent>
       </Card>
+
+      <QuickLinks
+        links={[
+          { href: "/a/forecast", label: "Prognoza", icon: TrendingUp },
+          { href: "/a/deals", label: "Oferty", icon: DollarSign },
+          { href: "/a/reports", label: "Raporty", icon: BarChart3 },
+        ]}
+      />
     </div>
   );
 }

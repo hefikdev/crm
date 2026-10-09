@@ -11,6 +11,7 @@ import {
   Users,
   Building2,
 } from "lucide-react";
+import { QuickLinks } from "@/components/crm/quick-links";
 
 const stageLabels: Record<string, string> = {
   lead: "Początkowe",
@@ -63,7 +64,7 @@ export default function ReportsPage() {
 
   if (statsLoading || analyticsLoading) {
     return (
-      <div className="p-6 space-y-6">
+      <div className="space-y-6">
         <Skeleton className="h-8 w-48 bg-accent" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -76,7 +77,7 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-foreground">Raporty</h1>
         <p className="text-muted-foreground text-sm mt-1">
@@ -367,6 +368,14 @@ export default function ReportsPage() {
           </CardContent>
         </Card>
       </div>
+
+      <QuickLinks
+        links={[
+          { href: "/a/forecast", label: "Prognoza", icon: TrendingUp },
+          { href: "/a/deals", label: "Oferty", icon: DollarSign },
+          { href: "/a/targets", label: "Cele", icon: Target },
+        ]}
+      />
     </div>
   );
 }

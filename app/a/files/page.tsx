@@ -14,7 +14,11 @@ import {
   FileSpreadsheet,
   Trash2,
   Download,
+  Users,
+  DollarSign,
+  CalendarClock,
 } from "lucide-react";
+import { QuickLinks } from "@/components/crm/quick-links";
 
 type FileType = "document" | "image" | "spreadsheet";
 
@@ -56,7 +60,7 @@ export default function FilesPage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Pliki</h1>
@@ -152,6 +156,14 @@ export default function FilesPage() {
           )}
         </CardContent>
       </Card>
+
+      <QuickLinks
+        links={[
+          { href: "/a/contacts", label: "Kontakty", icon: Users },
+          { href: "/a/deals", label: "Oferty", icon: DollarSign },
+          { href: "/a/activities", label: "Aktywności", icon: CalendarClock },
+        ]}
+      />
     </div>
   );
 }

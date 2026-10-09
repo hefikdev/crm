@@ -2,10 +2,11 @@ import { router, publicProcedure, protectedProcedure } from "@/server/trpc";
 import { db } from "@/db";
 import { contacts } from "@/db/schema/contacts";
 import { contactSchema } from "@/lib/validations";
-import { eq, desc, like, and, count, sql } from "drizzle-orm";
+import { eq, desc, like, and, count, sql, inArray } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { logger } from "@/lib/logger";
+import { runAutomations } from "@/server/automations";
 
 export const contactsRouter = router({
   list: protectedProcedure
@@ -13,8 +14,11 @@ export const contactsRouter = router({
       z.object({
         search: z.string().optional(),
         status: z.string().optional(),
+        source: z.string().optional(),
+        companyId: z.string().optional(),
+        sort: z.enum(["newest", "oldest", "name", "lastContacted"]).default("newest"),
         page: z.number().int().min(1).default(1),
-        limit: z.number().int().min(1).max(100).default(20),
+        limit: z.number().int().min(1).max(5000).default(20),
       })
     )
     .query(async ({ ctx, input }) => {
@@ -30,6 +34,25 @@ export const contactsRouter = router({
         conditions.push(eq(contacts.status, input.status as typeof contacts.$inferSelect.status));
       }
 
+      if (input.source && input.source !== "all") {
+        conditions.push(
+          eq(contacts.source, input.source as NonNullable<typeof contacts.$inferSelect.source>)
+        );
+      }
+
+      if (input.companyId && input.companyId !== "all") {
+        conditions.push(eq(contacts.companyId, input.companyId));
+      }
+
+      const orderBy =
+        input.sort === "oldest"
+          ? contacts.createdAt
+          : input.sort === "name"
+            ? contacts.firstName
+            : input.sort === "lastContacted"
+              ? desc(contacts.lastContactedAt)
+              : desc(contacts.createdAt);
+
       const offset = (input.page - 1) * input.limit;
 
       const [data, totalResult] = await Promise.all([
@@ -37,7 +60,7 @@ export const contactsRouter = router({
           .select()
           .from(contacts)
           .where(and(...conditions))
-          .orderBy(desc(contacts.createdAt))
+          .orderBy(orderBy)
           .limit(input.limit)
           .offset(offset),
         db
@@ -120,6 +143,14 @@ export const contactsRouter = router({
 
       const result = await db.insert(contacts).values(data).returning();
       logger.info({ contactId: result[0].id }, "contact created");
+
+      await runAutomations({
+        userId: ctx.user.id,
+        trigger: "contact_created",
+        contactId: result[0].id,
+        label: `${result[0].firstName} ${result[0].lastName}`,
+      });
+
       return result[0];
     }),
 
@@ -186,4 +217,85 @@ export const contactsRouter = router({
 
     return result;
   }),
+
+  // Bulk operations — world-class CRM table stakes.
+  bulkDelete: protectedProcedure
+    .input(z.object({ ids: z.array(z.string()).min(1).max(1000) }))
+    .mutation(async ({ ctx, input }) => {
+      await db
+        .delete(contacts)
+        .where(and(eq(contacts.userId, ctx.user.id), inArray(contacts.id, input.ids)));
+      logger.info({ count: input.ids.length }, "contacts bulk deleted");
+      return { success: true, count: input.ids.length };
+    }),
+
+  bulkUpdateStatus: protectedProcedure
+    .input(
+      z.object({
+        ids: z.array(z.string()).min(1).max(1000),
+        status: z.enum(["active", "inactive", "lead", "archived"]),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      await db
+        .update(contacts)
+        .set({ status: input.status, updatedAt: new Date().toISOString() })
+        .where(and(eq(contacts.userId, ctx.user.id), inArray(contacts.id, input.ids)));
+      logger.info({ count: input.ids.length, status: input.status }, "contacts bulk status updated");
+      return { success: true, count: input.ids.length };
+    }),
+
+  // CSV import — accepts parsed rows, skips duplicates by email.
+  importRows: protectedProcedure
+    .input(
+      z.object({
+        rows: z
+          .array(
+            z.object({
+              firstName: z.string().min(1).max(100),
+              lastName: z.string().min(1).max(100),
+              email: z.string().max(255).optional().or(z.literal("")),
+              phone: z.string().max(50).optional().or(z.literal("")),
+              position: z.string().max(200).optional().or(z.literal("")),
+            })
+          )
+          .min(1)
+          .max(5000),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const existing = await db
+        .select({ email: contacts.email })
+        .from(contacts)
+        .where(eq(contacts.userId, ctx.user.id));
+      const seen = new Set(existing.map((e) => e.email?.toLowerCase()).filter(Boolean));
+
+      const toInsert = [];
+      let skipped = 0;
+      for (const row of input.rows) {
+        const email = row.email?.trim().toLowerCase() || null;
+        if (email && seen.has(email)) {
+          skipped++;
+          continue;
+        }
+        if (email) seen.add(email);
+        toInsert.push({
+          userId: ctx.user.id,
+          firstName: row.firstName.trim(),
+          lastName: row.lastName.trim(),
+          email: row.email?.trim() || null,
+          phone: row.phone?.trim() || null,
+          position: row.position?.trim() || null,
+          status: "active" as const,
+          source: "other" as const,
+          tags: [],
+        });
+      }
+
+      if (toInsert.length > 0) {
+        await db.insert(contacts).values(toInsert);
+      }
+      logger.info({ imported: toInsert.length, skipped }, "contacts imported");
+      return { imported: toInsert.length, skipped };
+    }),
 });

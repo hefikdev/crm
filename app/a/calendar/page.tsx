@@ -7,7 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, Plus, CalendarDays } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, CalendarDays, ClipboardCheck, CalendarClock, History } from "lucide-react";
+import { QuickLinks } from "@/components/crm/quick-links";
 import { cn } from "@/lib/utils";
 
 const typeColors: Record<string, string> = {
@@ -85,7 +86,7 @@ export default function CalendarPage() {
   const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Kalendarz</h1>
@@ -260,6 +261,14 @@ export default function CalendarPage() {
           )}
         </CardContent>
       </Card>
+
+      <QuickLinks
+        links={[
+          { href: "/a/tasks", label: "Zadania", icon: ClipboardCheck },
+          { href: "/a/activities", label: "Aktywności", icon: CalendarClock },
+          { href: "/a/timeline", label: "Os czasu", icon: History },
+        ]}
+      />
     </div>
   );
 }

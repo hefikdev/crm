@@ -1,7 +1,6 @@
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { Sidebar } from "@/components/crm/sidebar";
-import { TopBar } from "@/components/crm/top-bar";
 import { CommandPalette } from "@/components/crm/command-palette";
 import { redirect } from "next/navigation";
 
@@ -25,8 +24,9 @@ export default async function CRMLayout({
         userEmail={session.user.email}
       />
       <main className="flex-1 overflow-y-auto bg-background">
-        <TopBar />
-        {children}
+        <div className="mx-auto w-[90%] max-w-[1200px] py-6">
+          {children}
+        </div>
       </main>
       <CommandPalette />
     </div>

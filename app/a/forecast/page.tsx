@@ -4,7 +4,8 @@ import { trpc } from "@/lib/trpc/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TrendingUp, Target, DollarSign, Percent } from "lucide-react";
+import { TrendingUp, Target, DollarSign, Percent, BarChart3 } from "lucide-react";
+import { QuickLinks } from "@/components/crm/quick-links";
 
 const stageLabels: Record<string, string> = {
   lead: "Początkowe",
@@ -46,7 +47,7 @@ export default function ForecastPage() {
 
   if (isLoading) {
     return (
-      <div className="p-6 space-y-6">
+      <div className="space-y-6">
         <Skeleton className="h-8 w-48 bg-accent" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {Array.from({ length: 3 }).map((_, i) => (
@@ -58,7 +59,7 @@ export default function ForecastPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-foreground">Prognoza</h1>
         <p className="text-muted-foreground text-sm mt-1">
@@ -216,6 +217,14 @@ export default function ForecastPage() {
           </div>
         </CardContent>
       </Card>
+
+      <QuickLinks
+        links={[
+          { href: "/a/deals", label: "Oferty", icon: DollarSign },
+          { href: "/a/targets", label: "Cele", icon: Target },
+          { href: "/a/reports", label: "Raporty", icon: BarChart3 },
+        ]}
+      />
     </div>
   );
 }

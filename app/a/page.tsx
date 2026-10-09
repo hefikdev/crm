@@ -10,6 +10,8 @@ import { KanbanBoard } from "@/components/crm/kanban-board";
 import { DashboardCharts } from "@/components/crm/dashboard-charts";
 import { DashboardWidgets, LeadScoreWidget } from "@/components/crm/dashboard-widgets";
 import { TargetProgressWidget } from "@/components/crm/target-progress-widget";
+import { FinancialCharts } from "@/components/crm/financial-charts";
+import { NeedsAttentionWidget } from "@/components/crm/needs-attention-widget";
 
 const stageColors: Record<string, string> = {
   lead: "bg-accent text-foreground/80",
@@ -56,7 +58,7 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Panel główny</h1>
@@ -97,12 +99,15 @@ export default function DashboardPage() {
 
       <DashboardCharts />
 
+      <NeedsAttentionWidget />
+
+      <FinancialCharts />
+
       <DashboardWidgets />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <LeadScoreWidget />
-        <TargetProgressWidget />
-      </div>
+      <LeadScoreWidget />
+
+      <TargetProgressWidget />
 
       <div>
         <h2 className="text-lg font-semibold text-foreground mb-4">Tablica Kanban</h2>

@@ -23,14 +23,25 @@ import {
   FolderOpen,
   Flame,
   History,
-  Info,
   Package,
   Target,
+  Headphones,
+  Sun,
+  Moon,
+  Zap,
 } from "lucide-react";
 import { QuickCreateModal } from "@/components/crm/quick-create";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { useTheme } from "next-themes";
 import { toast } from "sonner";
 
 const navItems = [
@@ -41,6 +52,7 @@ const navItems = [
   { href: "/a/deals", label: "Oferty", icon: DollarSign },
   { href: "/a/products", label: "Produkty", icon: Package },
   { href: "/a/targets", label: "Cele", icon: Target },
+  { href: "/a/automations", label: "Automatyzacje", icon: Zap },
   { href: "/a/forecast", label: "Prognoza", icon: TrendingUp },
   { href: "/a/tasks", label: "Zadania", icon: ClipboardCheck },
   { href: "/a/calendar", label: "Kalendarz", icon: Calendar },
@@ -50,7 +62,7 @@ const navItems = [
   { href: "/a/files", label: "Pliki", icon: FolderOpen },
   { href: "/a/reports", label: "Raporty", icon: BarChart3 },
   { href: "/a/activities", label: "Aktywności", icon: CalendarClock },
-  { href: "/a/about", label: "O systemie", icon: Info },
+  { href: "/a/support", label: "Wsparcie", icon: Headphones },
   { href: "/a/settings", label: "Ustawienia", icon: Settings },
 ];
 
@@ -58,6 +70,7 @@ export function Sidebar({ userName, userEmail }: { userName: string; userEmail: 
   const pathname = usePathname();
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   const initials = userName
     .split(" ")
@@ -125,31 +138,64 @@ export function Sidebar({ userName, userEmail }: { userName: string; userEmail: 
       </nav>
 
       <div className="p-3 border-t border-border">
-        <div className={cn("flex items-center gap-3", collapsed && "justify-center")}>
-          <Avatar className="h-8 w-8">
-            <AvatarFallback className="bg-accent text-foreground/80 text-xs">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
-          {!collapsed && (
-            <div className="flex-1 min-w-0">
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            className={cn(
+              "flex items-center gap-3 w-full rounded-lg p-2 hover:bg-accent transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              collapsed && "justify-center"
+            )}
+            aria-label="Menu konta"
+          >
+            <Avatar className="h-8 w-8 shrink-0">
+              <AvatarFallback className="bg-accent text-foreground/80 text-xs">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+            {!collapsed && (
+              <div className="flex-1 min-w-0 text-left">
+                <p className="text-sm font-medium text-foreground truncate">{userName}</p>
+                <p className="text-xs text-muted-foreground truncate">{userEmail}</p>
+              </div>
+            )}
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            side="top"
+            align="start"
+            className="bg-popover border-border text-popover-foreground w-56"
+          >
+            <div className="px-2 py-1.5">
               <p className="text-sm font-medium text-foreground truncate">{userName}</p>
               <p className="text-xs text-muted-foreground truncate">{userEmail}</p>
             </div>
-          )}
-        </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleSignOut}
-          className={cn(
-            "mt-2 text-muted-foreground hover:text-foreground hover:bg-accent cursor-pointer",
-            collapsed ? "w-full justify-center px-0" : "w-full justify-start"
-          )}
-        >
-          <LogOut className="h-4 w-4 shrink-0" />
-          {!collapsed && <span className="ml-2">Wyloguj</span>}
-        </Button>
+            <DropdownMenuSeparator className="bg-border" />
+            <DropdownMenuItem
+              render={<Link href="/a/settings" />}
+              className="cursor-pointer"
+            >
+              <Settings className="h-4 w-4 mr-2" />
+              Ustawienia
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="cursor-pointer"
+            >
+              {theme === "dark" ? (
+                <Sun className="h-4 w-4 mr-2" />
+              ) : (
+                <Moon className="h-4 w-4 mr-2" />
+              )}
+              {theme === "dark" ? "Tryb jasny" : "Tryb ciemny"}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator className="bg-border" />
+            <DropdownMenuItem
+              onClick={handleSignOut}
+              className="cursor-pointer text-red-500"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Wyloguj
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </aside>
   );

@@ -17,7 +17,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Plus, Search, Package, MoreHorizontal, Loader2 } from "lucide-react";
+import { Plus, Search, Package, MoreHorizontal, Loader2, DollarSign, Target, TrendingUp } from "lucide-react";
+import { QuickLinks } from "@/components/crm/quick-links";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -73,7 +74,7 @@ export default function ProductsPage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Produkty</h1>
@@ -233,6 +234,14 @@ export default function ProductsPage() {
           )}
         </CardContent>
       </Card>
+
+      <QuickLinks
+        links={[
+          { href: "/a/deals", label: "Oferty", icon: DollarSign },
+          { href: "/a/targets", label: "Cele", icon: Target },
+          { href: "/a/forecast", label: "Prognoza", icon: TrendingUp },
+        ]}
+      />
     </div>
   );
 }

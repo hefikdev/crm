@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Search, Mail, Phone, MoreHorizontal } from "lucide-react";
+import { Plus, Search, Mail, Phone, MoreHorizontal, Building2, DollarSign, CalendarClock, Download, Upload, Trash2, X } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +17,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { QuickLinks } from "@/components/crm/quick-links";
+import { exportCsv, parseCsv } from "@/lib/csv";
+import { useRef } from "react";
 
 const statusColors: Record<string, string> = {
   active: "bg-emerald-500/15 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-200",
@@ -29,11 +32,15 @@ export default function ContactsPage() {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
+  const [source, setSource] = useState("all");
+  const [sort, setSort] = useState("newest");
   const [page, setPage] = useState(1);
 
   const { data, isLoading, refetch } = trpc.contacts.list.useQuery({
     search,
     status,
+    source,
+    sort: sort as "newest" | "oldest" | "name" | "lastContacted",
     page,
     limit: 20,
   });
@@ -46,8 +53,101 @@ export default function ContactsPage() {
     onError: (err) => toast.error(err.message),
   });
 
+  const utils = trpc.useUtils();
+
+  const [selected, setSelected] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const bulkDelete = trpc.contacts.bulkDelete.useMutation({
+    onSuccess: (r) => {
+      toast.success(`Usunięto ${r.count} kontaktów`);
+      setSelected([]);
+      refetch();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const bulkStatus = trpc.contacts.bulkUpdateStatus.useMutation({
+    onSuccess: (r) => {
+      toast.success(`Zaktualizowano ${r.count} kontaktów`);
+      setSelected([]);
+      refetch();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const importRows = trpc.contacts.importRows.useMutation({
+    onSuccess: (r) => {
+      toast.success(`Zaimportowano ${r.imported}, pominięto ${r.skipped}`);
+      refetch();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const toggleAll = () => {
+    const ids = data?.data.map((c) => c.id) ?? [];
+    setSelected((prev) => (prev.length === ids.length ? [] : ids));
+  };
+
+  const toggleOne = (id: string) => {
+    setSelected((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const text = await file.text();
+    const rows = parseCsv(text);
+    if (rows.length < 2) {
+      toast.error("Plik CSV jest pusty lub nieprawidłowy");
+      return;
+    }
+    // Expect header: firstName,lastName,email,phone,position (order-independent)
+    const header = rows[0].map((h) => h.trim().toLowerCase());
+    const idx = (name: string) => header.indexOf(name);
+    const parsed = rows
+      .slice(1)
+      .map((r) => ({
+        firstName: r[idx("firstname")] ?? r[idx("imię")] ?? "",
+        lastName: r[idx("lastname")] ?? r[idx("nazwisko")] ?? "",
+        email: r[idx("email")] ?? r[idx("e-mail")] ?? "",
+        phone: r[idx("phone")] ?? r[idx("telefon")] ?? "",
+        position: r[idx("position")] ?? r[idx("stanowisko")] ?? "",
+      }))
+      .filter((r) => r.firstName && r.lastName);
+
+    if (parsed.length === 0) {
+      toast.error("Nie znaleziono wierszy z imieniem i nazwiskiem");
+      return;
+    }
+    importRows.mutate({ rows: parsed });
+    e.target.value = "";
+  };
+
+  const handleExport = async () => {
+    const all = await utils.contacts.list.fetch({
+      search,
+      status,
+      source,
+      sort: sort as "newest" | "oldest" | "name" | "lastContacted",
+      page: 1,
+      limit: 5000,
+    });
+    exportCsv("kontakty.csv", all.data, [
+      { key: "firstName", label: "Imię" },
+      { key: "lastName", label: "Nazwisko" },
+      { key: "email", label: "E-mail" },
+      { key: "phone", label: "Telefon" },
+      { key: "position", label: "Stanowisko" },
+      { key: "status", label: "Status" },
+      { key: "source", label: "Źródło" },
+    ]);
+  };
+
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Kontakty</h1>
@@ -55,15 +155,99 @@ export default function ContactsPage() {
             {data?.total ?? 0} kontaktów
           </p>
         </div>
-        <Link href="/a/contacts/new">
-          <Button className="bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer">
-            <Plus className="h-4 w-4 mr-2" />
-            Dodaj kontakt
+        <div className="flex items-center gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv,text/csv"
+            onChange={handleImport}
+            className="hidden"
+          />
+          <Button
+            variant="outline"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={importRows.isPending}
+            className="border-border text-muted-foreground hover:text-foreground cursor-pointer"
+          >
+            <Upload className="h-4 w-4 mr-2" />
+            Import CSV
           </Button>
-        </Link>
+          <Button
+            variant="outline"
+            onClick={handleExport}
+            className="border-border text-muted-foreground hover:text-foreground cursor-pointer"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Eksport CSV
+          </Button>
+          <Link href="/a/contacts/new">
+            <Button className="bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer">
+              <Plus className="h-4 w-4 mr-2" />
+              Dodaj kontakt
+            </Button>
+          </Link>
+        </div>
       </div>
 
-      <div className="flex gap-3">
+      {selected.length > 0 && (
+        <div className="flex items-center gap-3 p-3 rounded-lg border border-border bg-muted">
+          <span className="text-sm text-foreground">
+            Wybrano {selected.length}
+          </span>
+          <div className="flex items-center gap-2 ml-auto">
+            <select
+              onChange={(e) => {
+                if (e.target.value) {
+                  bulkStatus.mutate({
+                    ids: selected,
+                    status: e.target.value as "active" | "inactive" | "lead" | "archived",
+                  });
+                  e.target.value = "";
+                }
+              }}
+              className="px-3 py-1.5 rounded-lg border border-border bg-background text-foreground text-sm cursor-pointer"
+            >
+              <option value="">Zmień status...</option>
+              <option value="active">Aktywny</option>
+              <option value="inactive">Nieaktywny</option>
+              <option value="lead">Lead</option>
+              <option value="archived">Zarchiwizowany</option>
+            </select>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => {
+                if (confirm(`Usunąć ${selected.length} kontaktów?`))
+                  bulkDelete.mutate({ ids: selected });
+              }}
+              className="cursor-pointer"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Usuń
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSelected([])}
+              className="text-muted-foreground hover:text-foreground cursor-pointer"
+              aria-label="Odznacz"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+
+      <div className="flex gap-3 items-center">
+        <input
+          type="checkbox"
+          checked={
+            !!data?.data.length && selected.length === data.data.length
+          }
+          onChange={toggleAll}
+          className="h-4 w-4 rounded border-border accent-primary cursor-pointer shrink-0"
+          aria-label="Zaznacz wszystkie"
+        />
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -83,6 +267,29 @@ export default function ContactsPage() {
           <option value="inactive">Nieaktywne</option>
           <option value="lead">Lead</option>
           <option value="archived">Zarchiwizowane</option>
+        </select>
+        <select
+          value={source}
+          onChange={(e) => { setSource(e.target.value); setPage(1); }}
+          className="px-3 py-2 rounded-lg border border-border bg-muted text-foreground text-sm cursor-pointer"
+        >
+          <option value="all">Wszystkie źródła</option>
+          <option value="referral">Polecenie</option>
+          <option value="website">Strona</option>
+          <option value="email">E-mail</option>
+          <option value="phone">Telefon</option>
+          <option value="social">Social</option>
+          <option value="other">Inne</option>
+        </select>
+        <select
+          value={sort}
+          onChange={(e) => { setSort(e.target.value); setPage(1); }}
+          className="px-3 py-2 rounded-lg border border-border bg-muted text-foreground text-sm cursor-pointer"
+        >
+          <option value="newest">Najnowsze</option>
+          <option value="oldest">Najstarsze</option>
+          <option value="name">Nazwa A-Z</option>
+          <option value="lastContacted">Ostatni kontakt</option>
         </select>
       </div>
 
@@ -112,6 +319,14 @@ export default function ContactsPage() {
                   onClick={() => router.push(`/a/contacts/${contact.id}`)}
                 >
                   <div className="flex items-center gap-3 min-w-0">
+                    <input
+                      type="checkbox"
+                      checked={selected.includes(contact.id)}
+                      onChange={() => toggleOne(contact.id)}
+                      onClick={(e) => e.stopPropagation()}
+                      className="h-4 w-4 rounded border-border accent-primary cursor-pointer shrink-0"
+                      aria-label={`Zaznacz ${contact.firstName} ${contact.lastName}`}
+                    />
                     <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center text-sm font-medium text-foreground/80 shrink-0">
                       {contact.firstName[0]}{contact.lastName[0]}
                     </div>
@@ -203,6 +418,14 @@ export default function ContactsPage() {
           </Button>
         </div>
       )}
+
+      <QuickLinks
+        links={[
+          { href: "/a/companies", label: "Firmy", icon: Building2 },
+          { href: "/a/deals", label: "Oferty", icon: DollarSign },
+          { href: "/a/activities", label: "Aktywności", icon: CalendarClock },
+        ]}
+      />
     </div>
   );
 }

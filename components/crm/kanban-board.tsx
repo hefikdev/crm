@@ -32,7 +32,7 @@ const stageLabels: Record<string, string> = {
 export function KanbanBoard() {
   const router = useRouter();
   const { data: pipeline, isLoading, refetch } = trpc.deals.getPipeline.useQuery();
-  const updateDeal = trpc.deals.update.useMutation({
+  const updateStage = trpc.deals.updateStage.useMutation({
     onSuccess: () => refetch(),
     onError: (err) => toast.error(err.message),
   });
@@ -45,9 +45,9 @@ export function KanbanBoard() {
     e.preventDefault();
     const dealId = e.dataTransfer.getData("dealId");
     if (dealId) {
-      updateDeal.mutate({
+      updateStage.mutate({
         id: dealId,
-        data: { stage: targetStage as any, title: "", value: 0, probability: 0, tags: [] },
+        stage: targetStage as "lead" | "qualified" | "proposal" | "negotiation" | "closed_won" | "closed_lost",
       });
     }
   };

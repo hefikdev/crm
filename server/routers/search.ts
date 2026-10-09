@@ -3,6 +3,8 @@ import { db } from "@/db";
 import { contacts } from "@/db/schema/contacts";
 import { companies } from "@/db/schema/companies";
 import { deals } from "@/db/schema/deals";
+import { products } from "@/db/schema/products";
+import { activities } from "@/db/schema/activities";
 import { eq, and, or, like, desc } from "drizzle-orm";
 import { z } from "zod";
 
@@ -14,7 +16,7 @@ export const searchRouter = router({
       const q = `%${input.query}%`;
       const uid = ctx.user.id;
 
-      const [contactRows, companyRows, dealRows] = await Promise.all([
+      const [contactRows, companyRows, dealRows, productRows, activityRows] = await Promise.all([
         db
           .select({
             id: contacts.id,
@@ -52,6 +54,23 @@ export const searchRouter = router({
           .where(and(eq(deals.userId, uid), like(deals.title, q)))
           .orderBy(desc(deals.createdAt))
           .limit(5),
+        db
+          .select({ id: products.id, name: products.name, sku: products.sku, price: products.price })
+          .from(products)
+          .where(
+            and(
+              eq(products.userId, uid),
+              or(like(products.name, q), like(products.sku, q))
+            )
+          )
+          .orderBy(desc(products.createdAt))
+          .limit(5),
+        db
+          .select({ id: activities.id, title: activities.title, type: activities.type })
+          .from(activities)
+          .where(and(eq(activities.userId, uid), like(activities.title, q)))
+          .orderBy(desc(activities.createdAt))
+          .limit(5),
       ]);
 
       return {
@@ -72,6 +91,18 @@ export const searchRouter = router({
           label: d.title,
           sub: `${d.value.toLocaleString()} PLN`,
           href: `/a/deals/${d.id}`,
+        })),
+        products: productRows.map((p) => ({
+          id: p.id,
+          label: p.name,
+          sub: p.sku ?? `${p.price.toLocaleString()} PLN`,
+          href: `/a/products`,
+        })),
+        activities: activityRows.map((a) => ({
+          id: a.id,
+          label: a.title,
+          sub: a.type,
+          href: `/a/activities/${a.id}`,
         })),
       };
     }),

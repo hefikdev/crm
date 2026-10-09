@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CalendarClock, CheckCircle2, Clock, Plus } from "lucide-react";
+import { CalendarClock, CheckCircle2, Clock, Plus, Users, DollarSign, FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { QuickLinks } from "@/components/crm/quick-links";
 
 const typeColors: Record<string, string> = {
   call: "bg-blue-500/15 text-blue-700 dark:bg-blue-900 dark:text-blue-200",
@@ -37,7 +38,7 @@ export default function ActivitiesPage() {
   });
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Aktywności</h1>
@@ -73,7 +74,7 @@ export default function ActivitiesPage() {
           ) : (
             <div className="divide-y divide-border">
               {data?.data.map((activity) => (
-                <div key={activity.id} className="flex items-center justify-between p-4 hover:bg-muted transition-colors">
+                <div key={activity.id} className="flex items-center justify-between p-4 hover:bg-muted transition-colors cursor-pointer" onClick={() => router.push(`/a/activities/${activity.id}`)}>
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="h-10 w-10 rounded-lg bg-accent flex items-center justify-center shrink-0">
                       {activity.status === "completed" ? (
@@ -93,7 +94,7 @@ export default function ActivitiesPage() {
                   <div className="flex items-center gap-2">
                     <Badge className={typeColors[activity.type]}>{activity.type === "call" ? "Telefon" : activity.type === "email" ? "E-mail" : activity.type === "meeting" ? "Spotkanie" : activity.type === "task" ? "Zadanie" : activity.type === "note" ? "Notatka" : "Follow-up"}</Badge>
                     {activity.status === "pending" && (
-                      <Button variant="ghost" size="icon" onClick={() => completeActivity.mutate({ id: activity.id })} className="text-emerald-400 hover:text-emerald-300 cursor-pointer">
+                      <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); completeActivity.mutate({ id: activity.id }); }} className="text-emerald-400 hover:text-emerald-300 cursor-pointer">
                         <CheckCircle2 className="h-4 w-4" />
                       </Button>
                     )}
@@ -112,6 +113,14 @@ export default function ActivitiesPage() {
           <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(data.totalPages, p + 1))} disabled={page === data.totalPages} className="border-border text-muted-foreground cursor-pointer">Następna</Button>
         </div>
       )}
+
+      <QuickLinks
+        links={[
+          { href: "/a/contacts", label: "Kontakty", icon: Users },
+          { href: "/a/deals", label: "Oferty", icon: DollarSign },
+          { href: "/a/notes", label: "Notatki", icon: FileText },
+        ]}
+      />
     </div>
   );
 }

@@ -14,7 +14,11 @@ import {
   Clock,
   CalendarClock,
   Filter,
+  Users,
+  DollarSign,
+  FileText,
 } from "lucide-react";
+import { QuickLinks } from "@/components/crm/quick-links";
 
 const typeColors: Record<string, string> = {
   task: "bg-emerald-500/15 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-200",
@@ -51,7 +55,7 @@ export default function TasksPage() {
     ).length ?? 0;
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Zadania</h1>
@@ -212,6 +216,14 @@ export default function TasksPage() {
           )}
         </CardContent>
       </Card>
+
+      <QuickLinks
+        links={[
+          { href: "/a/activities", label: "Aktywności", icon: CalendarClock },
+          { href: "/a/calendar", label: "Kalendarz", icon: Clock },
+          { href: "/a/contacts", label: "Kontakty", icon: Users },
+        ]}
+      />
     </div>
   );
 }

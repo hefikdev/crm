@@ -57,6 +57,41 @@ export const dashboardRouter = router({
       .limit(10);
   }),
 
+  // "Needs attention" — the daily-driver view of a real CRM:
+  // overdue activities and deals that have gone stale (no update in 14 days).
+  getNeedsAttention: protectedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.user.id;
+    const now = Date.now();
+    const staleCutoff = new Date(now - 14 * 86400000).toISOString();
+
+    const [pendingActivities, openDeals] = await Promise.all([
+      db
+        .select()
+        .from(activities)
+        .where(and(eq(activities.userId, userId), eq(activities.status, "pending"))),
+      db
+        .select()
+        .from(deals)
+        .where(eq(deals.userId, userId)),
+    ]);
+
+    const overdue = pendingActivities
+      .filter((a) => a.dueDate && new Date(a.dueDate).getTime() < now)
+      .sort((a, b) => (a.dueDate ?? "").localeCompare(b.dueDate ?? ""))
+      .slice(0, 10);
+
+    const staleDeals = openDeals
+      .filter(
+        (d) =>
+          !["closed_won", "closed_lost"].includes(d.stage) &&
+          d.updatedAt < staleCutoff
+      )
+      .sort((a, b) => a.updatedAt.localeCompare(b.updatedAt))
+      .slice(0, 10);
+
+    return { overdue, staleDeals };
+  }),
+
   getAnalytics: protectedProcedure.query(async ({ ctx }) => {
     const userId = ctx.user.id;
 

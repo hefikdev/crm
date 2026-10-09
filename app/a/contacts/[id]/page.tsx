@@ -3,24 +3,43 @@
 import { trpc } from "@/lib/trpc/client";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { Loader2, ArrowLeft, Mail, Phone, Building2, Trash2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Mail,
+  Phone,
+  Building2,
+  Trash2,
+  Pencil,
+  Briefcase,
+  Tag,
+  FileText,
+  DollarSign,
+  Users,
+  CalendarClock,
+} from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect } from "react";
 import { ActivityTimeline } from "@/components/crm/activity-timeline";
+import { QuickLinks } from "@/components/crm/quick-links";
+
+const statusLabels: Record<string, string> = {
+  active: "Aktywny",
+  inactive: "Nieaktywny",
+  lead: "Lead",
+  archived: "Zarchiwizowany",
+};
+
+const sourceLabels: Record<string, string> = {
+  referral: "Polecenie",
+  website: "Strona WWW",
+  email: "E-mail",
+  phone: "Telefon",
+  social: "Social media",
+  other: "Inne",
+};
 
 export default function ContactDetailPage() {
   const params = useParams();
@@ -28,265 +47,216 @@ export default function ContactDetailPage() {
   const id = params.id as string;
 
   const { data: contact, isLoading } = trpc.contacts.getById.useQuery({ id });
-  const { data: companies } = trpc.companies.list.useQuery({ limit: 100 });
-  const updateContact = trpc.contacts.update.useMutation({
-    onSuccess: () => {
-      toast.success("Contact updated");
-      refetch();
-    },
-    onError: (err) => toast.error(err.message),
-  });
+  const { data: company } = trpc.companies.getById.useQuery(
+    { id: contact?.companyId ?? "" },
+    { enabled: !!contact?.companyId }
+  );
+
   const deleteContact = trpc.contacts.delete.useMutation({
     onSuccess: () => {
-      toast.success("Contact deleted");
+      toast.success("Kontakt usunięty");
       router.push("/a/contacts");
     },
     onError: (err) => toast.error(err.message),
   });
-  const { refetch } = trpc.contacts.getById.useQuery({ id });
-
-  const [form, setForm] = useState<{
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone: string;
-    position: string;
-    companyId: string;
-    status: "active" | "inactive" | "lead" | "archived";
-    source: "referral" | "website" | "email" | "phone" | "social" | "other";
-    notes: string;
-    tags: string[];
-  }>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    position: "",
-    companyId: "",
-    status: "active",
-    source: "other",
-    notes: "",
-    tags: [],
-  });
-
-  useEffect(() => {
-    if (contact) {
-      setForm({
-        firstName: contact.firstName,
-        lastName: contact.lastName,
-        email: contact.email ?? "",
-        phone: contact.phone ?? "",
-        position: contact.position ?? "",
-        companyId: contact.companyId ?? "",
-        status: contact.status,
-        source: contact.source ?? "other",
-        notes: contact.notes ?? "",
-        tags: contact.tags ?? [],
-      });
-    }
-  }, [contact]);
 
   if (isLoading) {
     return (
-      <div className="p-6 space-y-6 max-w-2xl mx-auto min-h-[calc(100vh-8rem)] flex flex-col justify-center">
+      <div className="space-y-6">
         <Skeleton className="h-8 w-32 bg-accent" />
-        <Skeleton className="h-96 bg-accent" />
+        <Skeleton className="h-64 bg-accent" />
+        <Skeleton className="h-48 bg-accent" />
       </div>
     );
   }
 
   if (!contact) {
     return (
-      <div className="p-6 text-center">
+      <div className="text-center py-12">
         <p className="text-muted-foreground">Kontakt nie znaleziony</p>
-        <Link href="/a/contacts" className="text-foreground hover:underline">Powrót do kontaktów</Link>
+        <Link href="/a/contacts" className="text-foreground hover:underline">
+          Powrót do kontaktów
+        </Link>
       </div>
     );
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    updateContact.mutate({ id, data: form });
-  };
+  const initials = `${contact.firstName[0]}${contact.lastName[0]}`;
 
   return (
-    <div className="p-6 space-y-6 max-w-2xl mx-auto min-h-[calc(100vh-8rem)] flex flex-col justify-center">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <Link href="/a/contacts" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground cursor-pointer">
+        <Link
+          href="/a/contacts"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground cursor-pointer"
+        >
           <ArrowLeft className="h-4 w-4" />
           Powrót
         </Link>
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={() => {
-            if (confirm("Usunąć ten kontakt?")) deleteContact.mutate({ id });
-          }}
-          className="cursor-pointer"
-        >
-          <Trash2 className="h-4 w-4 mr-2" />
-          Usuń
-        </Button>
-      </div>
-
-      <div className="flex items-center gap-4">
-        <div className="h-16 w-16 rounded-full bg-accent flex items-center justify-center text-2xl font-medium text-foreground/80">
-          {contact.firstName[0]}{contact.lastName[0]}
+        <div className="flex items-center gap-2">
+          <Link href={`/a/contacts/${id}/edit`}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-border text-muted-foreground hover:text-foreground cursor-pointer"
+            >
+              <Pencil className="h-4 w-4 mr-2" />
+              Edytuj
+            </Button>
+          </Link>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => {
+              if (confirm("Usunąć ten kontakt?")) deleteContact.mutate({ id });
+            }}
+            className="cursor-pointer"
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Usuń
+          </Button>
         </div>
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">{contact.firstName} {contact.lastName}</h1>
-          <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
-            {contact.email && <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{contact.email}</span>}
-            {contact.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{contact.phone}</span>}
-          </div>
-        </div>
-        <Badge className={
-          contact.status === "active" ? "bg-emerald-500/15 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-200" :
-          contact.status === "lead" ? "bg-blue-500/15 text-blue-700 dark:bg-blue-900 dark:text-blue-200" :
-          "bg-accent text-foreground/80"
-        }>
-          {contact.status}
-        </Badge>
       </div>
 
       <Card className="border-border bg-card">
-        <CardHeader>
-          <CardTitle className="text-foreground">Edytuj kontakt</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-foreground/80">Imię</Label>
-                <Input
-                  value={form.firstName}
-                  onChange={(e) => setForm({ ...form, firstName: e.target.value })}
-                  required
-                  className="bg-background text-foreground"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-foreground/80">Nazwisko</Label>
-                <Input
-                  value={form.lastName}
-                  onChange={(e) => setForm({ ...form, lastName: e.target.value })}
-                  required
-                  className="bg-background text-foreground"
-                />
-              </div>
+        <CardContent className="pt-6">
+          <div className="flex items-start gap-4">
+            <div className="h-16 w-16 rounded-full bg-accent flex items-center justify-center text-2xl font-medium text-foreground/80 shrink-0">
+              {initials}
             </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-foreground/80">Email</Label>
-                <Input
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  className="bg-background text-foreground"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-foreground/80">Telefon</Label>
-                <Input
-                  value={form.phone}
-                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                  className="bg-background text-foreground"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-foreground/80">Stanowisko</Label>
-                <Input
-                  value={form.position}
-                  onChange={(e) => setForm({ ...form, position: e.target.value })}
-                  className="bg-background text-foreground"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-foreground/80">Firma</Label>
-                <Select
-                  value={form.companyId}
-                  onValueChange={(v) => setForm({ ...form, companyId: v ?? "" })}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-3 flex-wrap">
+                <h1 className="text-2xl font-bold text-foreground">
+                  {contact.firstName} {contact.lastName}
+                </h1>
+                <Badge
+                  className={
+                    contact.status === "active"
+                      ? "bg-emerald-500/15 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-200"
+                      : contact.status === "lead"
+                        ? "bg-blue-500/15 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
+                        : "bg-accent text-foreground/80"
+                  }
                 >
-                  <SelectTrigger className="bg-background text-foreground">
-                    <SelectValue placeholder="Wybierz firmę" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border-border text-popover-foreground">
-                    <SelectItem value="">Brak</SelectItem>
-                    {companies?.data.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  {statusLabels[contact.status]}
+                </Badge>
+              </div>
+              {contact.position && (
+                <p className="text-muted-foreground text-sm mt-1">{contact.position}</p>
+              )}
+              <div className="flex flex-wrap items-center gap-4 mt-3 text-sm">
+                {contact.email && (
+                  <a
+                    href={`mailto:${contact.email}`}
+                    className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground cursor-pointer"
+                  >
+                    <Mail className="h-3.5 w-3.5" />
+                    {contact.email}
+                  </a>
+                )}
+                {contact.phone && (
+                  <a
+                    href={`tel:${contact.phone}`}
+                    className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground cursor-pointer"
+                  >
+                    <Phone className="h-3.5 w-3.5" />
+                    {contact.phone}
+                  </a>
+                )}
               </div>
             </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-foreground/80">Status</Label>
-                <Select
-                  value={form.status}
-                  onValueChange={(v) => setForm({ ...form, status: (v ?? "active") as typeof form.status })}
-                >
-                  <SelectTrigger className="bg-background text-foreground">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border-border text-popover-foreground">
-                    <SelectItem value="active">Aktywny</SelectItem>
-                    <SelectItem value="inactive">Nieaktywny</SelectItem>
-                    <SelectItem value="lead">Lead</SelectItem>
-                    <SelectItem value="archived">Zarchiwizowany</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-foreground/80">Źródło</Label>
-                <Select
-                  value={form.source}
-                  onValueChange={(v) => setForm({ ...form, source: (v ?? "other") as typeof form.source })}
-                >
-                  <SelectTrigger className="bg-background text-foreground">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border-border text-popover-foreground">
-                    <SelectItem value="referral">Polecenie</SelectItem>
-                    <SelectItem value="website">Strona WWW</SelectItem>
-                    <SelectItem value="email">E-mail</SelectItem>
-                    <SelectItem value="phone">Telefon</SelectItem>
-                    <SelectItem value="social">Social media</SelectItem>
-                    <SelectItem value="other">Inne</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-foreground/80">Notatki</Label>
-              <Textarea
-                value={form.notes}
-                onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                className="bg-background text-foreground min-h-[100px]"
-              />
-            </div>
-
-            <Button
-              type="submit"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
-              disabled={updateContact.isPending}
-            >
-              {updateContact.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : null}
-              Zapisz zmiany
-            </Button>
-          </form>
+          </div>
         </CardContent>
       </Card>
 
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="border-border bg-card">
+          <CardHeader>
+            <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+              Informacje
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <InfoRow icon={Building2} label="Firma">
+              {company ? (
+                <Link
+                  href={`/a/companies/${company.id}`}
+                  className="text-foreground hover:underline cursor-pointer"
+                >
+                  {company.name}
+                </Link>
+              ) : (
+                <span className="text-muted-foreground">Brak</span>
+              )}
+            </InfoRow>
+            <InfoRow icon={Briefcase} label="Stanowisko">
+              {contact.position || <span className="text-muted-foreground">Brak</span>}
+            </InfoRow>
+            <InfoRow icon={Tag} label="Źródło">
+              {sourceLabels[contact.source ?? "other"]}
+            </InfoRow>
+            <InfoRow icon={CalendarClock} label="Ostatni kontakt">
+              {contact.lastContactedAt
+                ? new Date(contact.lastContactedAt).toLocaleDateString("pl-PL")
+                : "Brak"}
+            </InfoRow>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border bg-card">
+          <CardHeader>
+            <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+              Notatki
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {contact.notes ? (
+              <p className="text-sm text-foreground whitespace-pre-wrap">{contact.notes}</p>
+            ) : (
+              <p className="text-sm text-muted-foreground">Brak notatek</p>
+            )}
+            {contact.tags && contact.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-4">
+                {contact.tags.map((tag) => (
+                  <Badge key={tag} className="bg-accent text-foreground/80">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
       <ActivityTimeline contactId={id} />
+
+      <QuickLinks
+        links={[
+          { href: "/a/contacts", label: "Kontakty", icon: Users },
+          { href: "/a/deals", label: "Oferty", icon: DollarSign },
+          { href: "/a/activities", label: "Aktywności", icon: CalendarClock },
+        ]}
+      />
+    </div>
+  );
+}
+
+function InfoRow({
+  icon: Icon,
+  label,
+  children,
+}: {
+  icon: typeof FileText;
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-4">
+      <span className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Icon className="h-3.5 w-3.5" />
+        {label}
+      </span>
+      <span className="text-sm text-foreground text-right">{children}</span>
     </div>
   );
 }

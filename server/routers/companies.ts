@@ -13,8 +13,11 @@ export const companiesRouter = router({
       z.object({
         search: z.string().optional(),
         status: z.string().optional(),
+        industry: z.string().optional(),
+        city: z.string().optional(),
+        sort: z.enum(["newest", "oldest", "name"]).default("newest"),
         page: z.number().int().min(1).default(1),
-        limit: z.number().int().min(1).max(100).default(20),
+        limit: z.number().int().min(1).max(5000).default(20),
       })
     )
     .query(async ({ ctx, input }) => {
@@ -30,6 +33,21 @@ export const companiesRouter = router({
         conditions.push(eq(companies.status, input.status as typeof companies.$inferSelect.status));
       }
 
+      if (input.industry && input.industry !== "all") {
+        conditions.push(eq(companies.industry, input.industry));
+      }
+
+      if (input.city && input.city !== "all") {
+        conditions.push(eq(companies.city, input.city));
+      }
+
+      const orderBy =
+        input.sort === "oldest"
+          ? companies.createdAt
+          : input.sort === "name"
+            ? companies.name
+            : desc(companies.createdAt);
+
       const offset = (input.page - 1) * input.limit;
 
       const [data, totalResult] = await Promise.all([
@@ -37,7 +55,7 @@ export const companiesRouter = router({
           .select()
           .from(companies)
           .where(and(...conditions))
-          .orderBy(desc(companies.createdAt))
+          .orderBy(orderBy)
           .limit(input.limit)
           .offset(offset),
         db

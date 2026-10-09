@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Search, DollarSign, MoreHorizontal } from "lucide-react";
+import { Plus, Search, DollarSign, MoreHorizontal, Users, Building2, Package, Download } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { QuickLinks } from "@/components/crm/quick-links";
+import { exportCsv } from "@/lib/csv";
 
 const stageColors: Record<string, string> = {
   lead: "bg-accent text-foreground/80",
@@ -31,11 +33,17 @@ export default function DealsPage() {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [stage, setStage] = useState("all");
+  const [sort, setSort] = useState("newest");
+  const [minValue, setMinValue] = useState("");
+  const [maxValue, setMaxValue] = useState("");
   const [page, setPage] = useState(1);
 
   const { data, isLoading, refetch } = trpc.deals.list.useQuery({
     search,
     stage,
+    sort: sort as "newest" | "oldest" | "value_desc" | "value_asc" | "closeDate",
+    minValue: minValue ? Number(minValue) : undefined,
+    maxValue: maxValue ? Number(maxValue) : undefined,
     page,
     limit: 20,
   });
@@ -46,19 +54,51 @@ export default function DealsPage() {
     onError: (err) => toast.error(err.message),
   });
 
+  const utils = trpc.useUtils();
+
+  const handleExport = async () => {
+    const all = await utils.deals.list.fetch({
+      search,
+      stage,
+      sort: sort as "newest" | "oldest" | "value_desc" | "value_asc" | "closeDate",
+      minValue: minValue ? Number(minValue) : undefined,
+      maxValue: maxValue ? Number(maxValue) : undefined,
+      page: 1,
+      limit: 5000,
+    });
+    exportCsv("oferty.csv", all.data, [
+      { key: "title", label: "Tytuł" },
+      { key: "value", label: "Wartość" },
+      { key: "currency", label: "Waluta" },
+      { key: "stage", label: "Etap" },
+      { key: "probability", label: "Prawdopodobieństwo" },
+      { key: "expectedCloseDate", label: "Data zamknięcia" },
+    ]);
+  };
+
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Oferty</h1>
           <p className="text-muted-foreground text-sm mt-1">{data?.total ?? 0} ofert</p>
         </div>
-        <Link href="/a/deals/new">
-          <Button className="bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer">
-            <Plus className="h-4 w-4 mr-2" />
-            Dodaj ofertę
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={handleExport}
+            className="border-border text-muted-foreground hover:text-foreground cursor-pointer"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Eksport CSV
           </Button>
-        </Link>
+          <Link href="/a/deals/new">
+            <Button className="bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer">
+              <Plus className="h-4 w-4 mr-2" />
+              Dodaj ofertę
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-4 gap-4">
@@ -94,6 +134,27 @@ export default function DealsPage() {
           <option value="closed_won">Zrealizowane</option>
           <option value="closed_lost">Utracone</option>
         </select>
+        <select value={sort} onChange={(e) => { setSort(e.target.value); setPage(1); }} className="px-3 py-2 rounded-lg border border-border bg-muted text-foreground text-sm cursor-pointer">
+          <option value="newest">Najnowsze</option>
+          <option value="oldest">Najstarsze</option>
+          <option value="value_desc">Wartość malejąco</option>
+          <option value="value_asc">Wartość rosnąco</option>
+          <option value="closeDate">Data zamknięcia</option>
+        </select>
+        <Input
+          type="number"
+          placeholder="Wartość od"
+          value={minValue}
+          onChange={(e) => { setMinValue(e.target.value); setPage(1); }}
+          className="w-32 border-border bg-muted text-foreground placeholder:text-muted-foreground/70"
+        />
+        <Input
+          type="number"
+          placeholder="Wartość do"
+          value={maxValue}
+          onChange={(e) => { setMaxValue(e.target.value); setPage(1); }}
+          className="w-32 border-border bg-muted text-foreground placeholder:text-muted-foreground/70"
+        />
       </div>
 
       <Card className="border-border bg-card">
@@ -149,6 +210,14 @@ export default function DealsPage() {
           <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(data.totalPages, p + 1))} disabled={page === data.totalPages} className="border-border text-muted-foreground cursor-pointer">Następna</Button>
         </div>
       )}
+
+      <QuickLinks
+        links={[
+          { href: "/a/contacts", label: "Kontakty", icon: Users },
+          { href: "/a/companies", label: "Firmy", icon: Building2 },
+          { href: "/a/products", label: "Produkty", icon: Package },
+        ]}
+      />
     </div>
   );
 }

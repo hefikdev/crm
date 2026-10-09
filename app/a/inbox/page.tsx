@@ -17,9 +17,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2, Mail, Send, Plus, Search, ArrowLeft } from "lucide-react";
+import { Loader2, Mail, Send, Plus, Search, ArrowLeft, Users, FileText, CalendarClock } from "lucide-react";
+import { QuickLinks } from "@/components/crm/quick-links";
+import { useRouter } from "next/navigation";
 
 export default function InboxPage() {
+  const router = useRouter();
   const [view, setView] = useState<"list" | "compose">("list");
   const [search, setSearch] = useState("");
   const [type, setType] = useState("email");
@@ -66,7 +69,7 @@ export default function InboxPage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Wiadomości</h1>
@@ -173,7 +176,8 @@ export default function InboxPage() {
                   {filteredMessages.map((msg) => (
                     <div
                       key={msg.id}
-                      className="flex items-center gap-3 p-4 hover:bg-muted transition-colors"
+                      onClick={() => router.push(`/a/activities/${msg.id}`)}
+                      className="flex items-center gap-3 p-4 hover:bg-muted transition-colors cursor-pointer"
                     >
                       <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center shrink-0">
                         <Mail className="h-4 w-4 text-muted-foreground" />
@@ -208,6 +212,14 @@ export default function InboxPage() {
           </Card>
         </>
       )}
+
+      <QuickLinks
+        links={[
+          { href: "/a/contacts", label: "Kontakty", icon: Users },
+          { href: "/a/notes", label: "Notatki", icon: FileText },
+          { href: "/a/activities", label: "Aktywności", icon: CalendarClock },
+        ]}
+      />
     </div>
   );
 }

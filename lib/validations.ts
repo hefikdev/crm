@@ -97,3 +97,20 @@ export const dealItemSchema = z.object({
   quantity: z.number().int().min(1).default(1),
   unitPrice: z.number().min(0).default(0),
 });
+
+export const automationSchema = z.object({
+  name: z.string().min(1).max(200),
+  trigger: z.enum(["deal_created", "deal_stage_changed", "deal_won", "contact_created"]),
+  triggerValue: z.string().max(100).optional().or(z.literal("")),
+  action: z.enum(["create_task", "create_note", "send_email"]),
+  actionValue: z.string().min(1).max(5000),
+  actionSubject: z.string().max(300).optional().or(z.literal("")),
+  delayMinutes: z.number().int().min(0).max(100000).default(0),
+  active: z.boolean().default(true),
+});
+
+export const emailTemplateSchema = z.object({
+  name: z.string().min(1).max(200),
+  subject: z.string().min(1).max(300),
+  body: z.string().min(1).max(10000),
+});

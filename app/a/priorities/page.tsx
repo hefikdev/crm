@@ -7,7 +7,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { CheckCircle2, Clock, AlertTriangle, Sun } from "lucide-react";
+import { CheckCircle2, Clock, AlertTriangle, Sun, ClipboardCheck, CalendarClock, Users } from "lucide-react";
+import { QuickLinks } from "@/components/crm/quick-links";
 
 export default function PrioritiesPage() {
   const router = useRouter();
@@ -24,23 +25,22 @@ export default function PrioritiesPage() {
     onError: (err) => toast.error(err.message),
   });
 
-  const now = Date.now();
   const items = data?.data ?? [];
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  const endOfToday = new Date(startOfToday);
+  endOfToday.setDate(endOfToday.getDate() + 1);
+
   const overdue = items.filter(
-    (a) => a.dueDate && new Date(a.dueDate).getTime() < now
+    (a) => a.dueDate && new Date(a.dueDate).getTime() < startOfToday.getTime()
   );
   const today = items.filter((a) => {
     if (!a.dueDate) return false;
-    const d = new Date(a.dueDate);
-    const t = new Date();
-    return (
-      d.getDate() === t.getDate() &&
-      d.getMonth() === t.getMonth() &&
-      d.getFullYear() === t.getFullYear()
-    );
+    const t = new Date(a.dueDate).getTime();
+    return t >= startOfToday.getTime() && t < endOfToday.getTime();
   });
   const upcoming = items.filter(
-    (a) => !a.dueDate || new Date(a.dueDate).getTime() >= now
+    (a) => !a.dueDate || new Date(a.dueDate).getTime() >= endOfToday.getTime()
   );
 
   const sections = [
@@ -50,7 +50,7 @@ export default function PrioritiesPage() {
   ];
 
   return (
-    <div className="p-6 space-y-6 max-w-3xl">
+    <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-foreground">Priorytety</h1>
         <p className="text-muted-foreground text-sm mt-1">
@@ -116,6 +116,14 @@ export default function PrioritiesPage() {
           </Card>
         ))
       )}
+
+      <QuickLinks
+        links={[
+          { href: "/a/tasks", label: "Zadania", icon: ClipboardCheck },
+          { href: "/a/activities", label: "Aktywności", icon: CalendarClock },
+          { href: "/a/contacts", label: "Kontakty", icon: Users },
+        ]}
+      />
     </div>
   );
 }

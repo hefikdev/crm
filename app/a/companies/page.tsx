@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Search, Globe, MoreHorizontal } from "lucide-react";
+import { Plus, Search, Globe, MoreHorizontal, Users, DollarSign, CalendarClock, Download } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,16 +17,22 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { QuickLinks } from "@/components/crm/quick-links";
+import { exportCsv } from "@/lib/csv";
 
 export default function CompaniesPage() {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
+  const [industry, setIndustry] = useState("all");
+  const [sort, setSort] = useState("newest");
   const [page, setPage] = useState(1);
 
   const { data, isLoading, refetch } = trpc.companies.list.useQuery({
     search,
     status,
+    industry,
+    sort: sort as "newest" | "oldest" | "name",
     page,
     limit: 20,
   });
@@ -39,19 +45,51 @@ export default function CompaniesPage() {
     onError: (err) => toast.error(err.message),
   });
 
+  const utils = trpc.useUtils();
+
+  const handleExport = async () => {
+    const all = await utils.companies.list.fetch({
+      search,
+      status,
+      industry,
+      sort: sort as "newest" | "oldest" | "name",
+      page: 1,
+      limit: 5000,
+    });
+    exportCsv("firmy.csv", all.data, [
+      { key: "name", label: "Nazwa" },
+      { key: "domain", label: "Domena" },
+      { key: "industry", label: "Branża" },
+      { key: "city", label: "Miasto" },
+      { key: "phone", label: "Telefon" },
+      { key: "email", label: "E-mail" },
+      { key: "status", label: "Status" },
+    ]);
+  };
+
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Firmy</h1>
           <p className="text-muted-foreground text-sm mt-1">{data?.total ?? 0} firm</p>
         </div>
-        <Link href="/a/companies/new">
-          <Button className="bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer">
-            <Plus className="h-4 w-4 mr-2" />
-            Dodaj firmę
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={handleExport}
+            className="border-border text-muted-foreground hover:text-foreground cursor-pointer"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Eksport CSV
           </Button>
-        </Link>
+          <Link href="/a/companies/new">
+            <Button className="bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer">
+              <Plus className="h-4 w-4 mr-2" />
+              Dodaj firmę
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <div className="flex gap-3">
@@ -74,6 +112,32 @@ export default function CompaniesPage() {
           <option value="inactive">Nieaktywne</option>
           <option value="lead">Lead</option>
           <option value="archived">Zarchiwizowane</option>
+        </select>
+        <select
+          value={industry}
+          onChange={(e) => { setIndustry(e.target.value); setPage(1); }}
+          className="px-3 py-2 rounded-lg border border-border bg-muted text-foreground text-sm cursor-pointer"
+        >
+          <option value="all">Wszystkie branże</option>
+          <option value="Technologia">Technologia</option>
+          <option value="Finanse">Finanse</option>
+          <option value="Produkcja">Produkcja</option>
+          <option value="Handel">Handel</option>
+          <option value="Logistyka">Logistyka</option>
+          <option value="Medycyna">Medycyna</option>
+          <option value="Edukacja">Edukacja</option>
+          <option value="Budownictwo">Budownictwo</option>
+          <option value="Energetyka">Energetyka</option>
+          <option value="Marketing">Marketing</option>
+        </select>
+        <select
+          value={sort}
+          onChange={(e) => { setSort(e.target.value); setPage(1); }}
+          className="px-3 py-2 rounded-lg border border-border bg-muted text-foreground text-sm cursor-pointer"
+        >
+          <option value="newest">Najnowsze</option>
+          <option value="oldest">Najstarsze</option>
+          <option value="name">Nazwa A-Z</option>
         </select>
       </div>
 
@@ -148,6 +212,14 @@ export default function CompaniesPage() {
           <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.min(data.totalPages, p + 1))} disabled={page === data.totalPages} className="border-border text-muted-foreground cursor-pointer">Następna</Button>
         </div>
       )}
+
+      <QuickLinks
+        links={[
+          { href: "/a/contacts", label: "Kontakty", icon: Users },
+          { href: "/a/deals", label: "Oferty", icon: DollarSign },
+          { href: "/a/activities", label: "Aktywności", icon: CalendarClock },
+        ]}
+      />
     </div>
   );
 }
